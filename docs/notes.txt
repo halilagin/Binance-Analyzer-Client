@@ -1,0 +1,1 @@
+see: see: https://github.com/maximegris/angular-electron
