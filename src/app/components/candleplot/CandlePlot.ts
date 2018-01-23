@@ -1,5 +1,6 @@
-import {Component, OnInit, Input} from '@angular/core';
+import {Component, OnInit, Input, ViewChild, forwardRef} from '@angular/core';
 import {CandleModel, CandleUIParameters} from "../../model/model";
+import {BasWebSocketService} from "../../services/BasWebSocketService";
 
 
 // see: https://www.sarasoueidan.com/blog/svg-coordinate-systems/
@@ -96,15 +97,21 @@ export class Candle implements OnInit {
   },
   template: `
     <ng-content></ng-content>
-  `
+  `,
+  providers:[BasWebSocketService]
 })
 export class CandlePlotSvg implements OnInit {
+
+
+
+  constructor(){
+  }
+
 
   // @Input() width;
   // @Input() height;
   //
 
-  constructor() { }
 
   ngOnInit() {
   }
@@ -125,9 +132,16 @@ export class CandlePlotSvg implements OnInit {
 })
 export class CandlePlot implements OnInit {
 
+  @ViewChild(forwardRef(() => CandlePlotSvg)) candlePlotSvg: CandlePlotSvg;
+
+
   constructor() { }
 
   ngOnInit() {
+  }
+
+  sendMessage(){
+    //this.candlePlotSvg.sendMessage("button'dan selam!");
   }
 
 }

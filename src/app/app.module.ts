@@ -20,6 +20,10 @@ import { HomeComponent } from './components/home/home.component';
 import {VarNav} from "./components/varnav/VarNav";
 import {CandlePlot, Candle,  SvgG, CandlePlotSvg} from "./components/candleplot/CandlePlot";
 import {TradeFlow} from "./components/tradeflow/TradeFlow";
+import {BasWebSocketService} from "./services/BasWebSocketService";
+import {BacLocalService} from "./services/BacLocalService";
+import {ServerInitProgressBar} from "./dialogs/ServerInitProgressBar";
+import {ServerInitProgressBarService} from "./services/ServerInitProgressBarService";
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -36,7 +40,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     Candle,
     CandlePlotSvg,
     CandlePlot,
-    SvgG
+    SvgG,
+    ServerInitProgressBar
   ],
   imports: [
     BrowserModule,
@@ -51,7 +56,7 @@ export function HttpLoaderFactory(http: HttpClient) {
       }
     })
   ],
-  providers: [ElectronService],
+  providers: [ElectronService, BasWebSocketService, BacLocalService, ServerInitProgressBarService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
