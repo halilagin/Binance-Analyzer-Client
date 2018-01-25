@@ -24,6 +24,7 @@ import {BasWebSocketService} from "./services/BasWebSocketService";
 import {BacLocalService} from "./services/BacLocalService";
 import {ServerInitProgressBar} from "./dialogs/ServerInitProgressBar";
 import {ServerInitProgressBarService} from "./services/ServerInitProgressBarService";
+import {WebSocketCandleReaderService} from "./services/WebSocketCandleReaderService";
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -56,7 +57,7 @@ export function HttpLoaderFactory(http: HttpClient) {
       }
     })
   ],
-  providers: [ElectronService, BasWebSocketService, BacLocalService, ServerInitProgressBarService],
+  providers: [ElectronService, BasWebSocketService, BacLocalService, ServerInitProgressBarService, WebSocketCandleReaderService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

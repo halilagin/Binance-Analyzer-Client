@@ -13,6 +13,14 @@ export class CandleUIParameters {
 }
 
 
+export class ObjectId{
+  public str:string=null;
+
+  constructor(str:string){
+    this.str = str;
+  }
+}
+
 export class CandleModel  {
 
 

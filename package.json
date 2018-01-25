@@ -36,7 +36,9 @@
     "pree2e": "webdriver-manager update --standalone false --gecko false --quiet && npm run build",
     "e2e": "protractor ./protractor.conf.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "angular2-uuid": "^1.1.1"
+  },
   "devDependencies": {
     "@angular/common": "5.2.0",
     "@angular/compiler": "5.2.0",

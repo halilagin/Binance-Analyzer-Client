@@ -3,6 +3,7 @@ import {BasWebSocketService} from "../../services/BasWebSocketService";
 import {BacLocalService} from "../../services/BacLocalService";
 import {BacServerInitializationState, EnumBacServerInitializationState} from "../../model/bac.frontend";
 import {ServerInitProgressBarService} from "../../services/ServerInitProgressBarService";
+import {WebSocketCandleReaderService} from "../../services/WebSocketCandleReaderService";
 
 @Component({
   selector: 'div[app-home]',
@@ -15,7 +16,10 @@ export class HomeComponent implements OnInit {
   basMessage:any=null;
   public ws:WebSocket;
 
-  constructor(public wsService:BasWebSocketService, private bacLocalService:BacLocalService, private serverInitializerProgressBarMessageService:ServerInitProgressBarService){
+  constructor(public wsService:BasWebSocketService,
+              private bacLocalService:BacLocalService,
+              private serverInitializerProgressBarMessageService:ServerInitProgressBarService,
+              private candleReaderService:WebSocketCandleReaderService){
     this.wsService.createObservableSocket("ws://localhost:4271")
       .subscribe(data=> this.wsHandler(data));
 
@@ -26,7 +30,6 @@ export class HomeComponent implements OnInit {
     this.serverMessage = data;
     //console.log("websocket.server.message:",this.serverMessage);
     this.basMessage = JSON.parse(this.serverMessage.data);
-    console.log("bacmessage", this.basMessage);
 
     if (this.basMessage.action=="subscribe") {
       this.bacLocalService.clientState.bacClientIndex = this.basMessage.clientIndex;
@@ -41,8 +44,9 @@ export class HomeComponent implements OnInit {
     } else if (this.basMessage.action=="ServerInitializerFinished") {
       this.bacLocalService.clientState.bacServerInitializationState = EnumBacServerInitializationState.FINISHED;
       this.serverInitializerProgressBarMessageService.sendMessage(EnumBacServerInitializationState.FINISHED);
+    }else if (this.basMessage.action=="retrieveCandles") {
+      this.candleReaderService.sendMessage(this.basMessage);
     }
-      console.log(this.basMessage);
   }
 
 

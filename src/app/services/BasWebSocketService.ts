@@ -20,7 +20,32 @@ export class BasWebSocketService {
     });
   }
 
+
+
+  // Make the function wait until the connection is made...
+  waitForSocketConnection(socket, callback){
+  setTimeout(
+     () =>{
+      if (socket.readyState === WebSocket.OPEN) {
+        console.log("Connection is made");
+        if(callback != null){
+          callback();
+        }
+        return;
+
+      } else {
+        console.log("wait for connection...");
+        this.waitForSocketConnection(socket, callback);
+      }
+
+    }, 500); // wait 500 milisecond for the connection...
+  }
+
+
   sendMessage(message:any) {
-    this.ws.send(message);
+    this.waitForSocketConnection(this.ws, ()=>{
+      this.ws.send(message);
+    });
+    //this.ws.send(message);
   }
 }
