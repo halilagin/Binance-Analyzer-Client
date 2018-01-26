@@ -18,7 +18,7 @@ import { ElectronService } from './providers/electron.service';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import {VarNav} from "./components/varnav/VarNav";
-import {CandlePlot, Candle,  SvgG, CandlePlotSvg} from "./components/candleplot/CandlePlot";
+import {CandlePlot, Candle, CandlePlotG, CandlePlotSvg} from "./components/candleplot/CandlePlot";
 import {TradeFlow} from "./components/tradeflow/TradeFlow";
 import {BasWebSocketService} from "./services/BasWebSocketService";
 import {BacLocalService} from "./services/BacLocalService";
@@ -39,9 +39,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     CandlePlot,
     TradeFlow,
     Candle,
-    CandlePlotSvg,
+    CandlePlotG,
     CandlePlot,
-    SvgG,
+    CandlePlotSvg,
     ServerInitProgressBar
   ],
   imports: [
@@ -57,6 +57,7 @@ export function HttpLoaderFactory(http: HttpClient) {
       }
     })
   ],
+  entryComponents:[Candle],
   providers: [ElectronService, BasWebSocketService, BacLocalService, ServerInitProgressBarService, WebSocketCandleReaderService],
   bootstrap: [AppComponent]
 })

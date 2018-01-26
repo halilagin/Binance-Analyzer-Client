@@ -17,3 +17,22 @@ export class BacClientState{
   bacClientIndex:number=-1;
   bacServerInitializationState:EnumBacServerInitializationState=EnumBacServerInitializationState.NOTRELEVANT;
 }
+
+
+export class MCandle{
+  assetVolume:number;
+  close:number;
+  closeTime:number;
+  dummy:number;
+  high:number;
+  low:number;
+  middle:number;
+  open:number;
+  openTime:number;
+  symbol:number;
+  takerBaseVolume:number;
+  takerQuoteVolume:number;
+  timeInterval:number;
+  tradeCount:number;
+  volume:number;
+}
