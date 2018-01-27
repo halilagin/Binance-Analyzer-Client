@@ -67,3 +67,13 @@ export class CandleUIModel  {
 
 }
 
+
+export class CandleCacheMessage{
+  public action:string;
+  public data:any;
+  public plotUUID:string;
+
+}
+
+
+

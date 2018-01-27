@@ -25,6 +25,7 @@ import {BacLocalService} from "./services/BacLocalService";
 import {ServerInitProgressBar} from "./dialogs/ServerInitProgressBar";
 import {ServerInitProgressBarService} from "./services/ServerInitProgressBarService";
 import {WebSocketCandleReaderService} from "./services/WebSocketCandleReaderService";
+import {CandleCacheService} from "./components/candleplot/CandleCacheService";
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -58,7 +59,14 @@ export function HttpLoaderFactory(http: HttpClient) {
     })
   ],
   entryComponents:[Candle],
-  providers: [ElectronService, BasWebSocketService, BacLocalService, ServerInitProgressBarService, WebSocketCandleReaderService],
+  providers: [
+    ElectronService,
+    BasWebSocketService,
+    BacLocalService,
+    ServerInitProgressBarService,
+    WebSocketCandleReaderService,
+    CandleCacheService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

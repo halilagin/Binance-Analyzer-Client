@@ -10,6 +10,8 @@ import {Subscription} from "rxjs";
 import {WebSocketCandleReaderService} from "../../services/WebSocketCandleReaderService";
 import { UUID } from 'angular2-uuid';
 import {MCandle} from "../../model/bac.frontend";
+import {CandleCacheService, CandleCache} from "./CandleCacheService";
+import {CandlePlotScaleService} from "./CandlePlotScaleService";
 
 // see: https://www.sarasoueidan.com/blog/svg-coordinate-systems/
 // see: https://github.com/ohjames/rxjs-websockets
@@ -61,9 +63,19 @@ export class Candle implements OnInit {
 
   private translateString:String;
 
-  constructor() {
+  candleCacheSubscription: Subscription;
+
+  constructor( private cacheService:CandleCacheService) {
+    this.candleCacheSubscription = this.cacheService.getMessage().subscribe(message => this.candleCacheMessageHandler(message));
 
   }
+
+
+
+  candleCacheMessageHandler(message:any){
+    console.log("candle: candle.cache message received!");
+  }
+
 
   translate(){
     let x_ = this.model.x;
@@ -122,8 +134,12 @@ export class CandlePlotG implements OnInit {
 
   @Input() symbol:string="XLMETH";
   @Input() timeInterval:number=60;
-  plotId:string=null;
-  subscription: Subscription;
+  @Input() width:string='800';
+  @Input() height:string='480';
+
+
+  uuid:string=null;
+  candleReaderSubscription: Subscription;
   candleComponents=[];
 
   private candleFactory=null;
@@ -135,17 +151,34 @@ export class CandlePlotG implements OnInit {
 
 
 
-  constructor(@Host() parent: CandlePlotSvg, @Inject(ViewContainerRef) viewContainerRef, private meRef: ElementRef, private resolver: ComponentFactoryResolver, private renderer: Renderer,public wsService:BasWebSocketService, private bacLocalService:BacLocalService, private candleReaderService:WebSocketCandleReaderService) {
+  constructor(
+    @Host() parent: CandlePlotSvg,
+    @Inject(ViewContainerRef) viewContainerRef,
+    private meRef: ElementRef,
+    private resolver: ComponentFactoryResolver,
+    private renderer: Renderer,
+    public wsService:BasWebSocketService,
+    private bacLocalService:BacLocalService,
+    private candleReaderService:WebSocketCandleReaderService,
+    private cacheService:CandleCacheService,
+    private scaleService:CandlePlotScaleService
+
+  ) {
     this.parent = parent;
-    this.plotId = UUID.UUID();
+    this.uuid = UUID.UUID();
 
-    this.subscription = this.candleReaderService.getMessage().subscribe(message => this.messageHandler(message));
+    this.candleReaderSubscription = this.candleReaderService.getMessage().subscribe(message => this.messageHandler(message));
+    this.cacheService.initCandlePlotCache(this.uuid);
+    this.scaleService.initCandlePlotScale(
+      this.uuid,
+      [0,0,0,0],/*minx,miny,max,maxy*/
+      +this.width,
+      +this.height
+    );
 
-    this.candlesCircularArray={array:new MCandle[500],index:0};
 
-    for (let i=0;i<500;i++){
-      this.testCandleXs.push(i);
-    }
+
+
   }
 
 
@@ -153,7 +186,7 @@ export class CandlePlotG implements OnInit {
   ngAfterViewInit() {
   }
 
-  createCandleComponent(mcandle:MCandle, index:number) {
+  createCandleComponent(mcandle:MCandle, index:number, canvasWidth:number, canvasHeight:number) {
 
     let factory = this.resolver.resolveComponentFactory(Candle);
     //let factory = this.resolver.resolveComponentFactory(Candle);
@@ -167,30 +200,20 @@ export class CandlePlotG implements OnInit {
     candle.instance.close = mcandle.close;
     candle.instance.openTime = mcandle.openTime;
     candle.instance.timeInterval = mcandle.timeInterval;
-    candle.instance.x = ;
-    candle.instance.y = 24;
+    candle.instance.x = this.scaleService.scaleX(this.uuid)(mcandle.openTime);//this syntax is true, scaleX returns a function
+    candle.instance.y = this.scaleService.scaleY(this.uuid)(mcandle.low);//this syntax is true, scaleY returns a function
     this.gcontainer.insert(candle.hostView);
     candle.changeDetectorRef.detectChanges();
 
   }
 
 
-  //TODO: create circular array.
   projectCandles(candles:MCandle[]){
-    let index_:number=this.candlesCircularArray.index;
-    for (let i=0;i<candles.length;i++){
-      index_+=i;
-      index_ = index_%500;
-      this.candlesCircularArray.array[index]=candles[i];
-    }
-
-    let idx=-1;
-    for (let i=0;i<Math.abs(this.candlesCircularArray.index-index_);i++){
-      idx = (this.candlesCircularArray.index+i)%500;
-      let candle = candles[idx];
-      this.createCandleComponent(candle_, idx);
-    }
-    this.candlesCircularArray.index = idx;
+    this.cache.insertCollection(candles);
+    let candles_ = this.cache.readLastInserteds();
+    candles_.forEach((c,i)=>{
+      this.createCandleComponent(c, i, +this.width, +this.height);
+    });
 
     // let mcandle = candles[0];
     // mcandle.low = 10;
