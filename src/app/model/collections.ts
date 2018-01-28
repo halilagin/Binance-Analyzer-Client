@@ -1,12 +1,12 @@
 
 export interface IKeyedCollection<T> {
-  Add(key: string, value: T);
-  ContainsKey(key: string): boolean;
-  Count(): number;
-  Item(key: string): T;
-  Keys(): string[];
-  Remove(key: string): T;
-  Values(): T[];
+  add(key: string, value: T);
+  containsKey(key: string): boolean;
+  count(): number;
+  item(key: string): T;
+  keys(): string[];
+  remove(key: string): T;
+  values(): T[];
 }
 
 
@@ -15,19 +15,19 @@ export interface IKeyedCollection<T> {
 export class KeyedCollection<T> implements IKeyedCollection<T> {
   private items: { [index: string]: T } = {};
 
-  private count: number = 0;
+  private count_: number = 0;
 
   public containsKey(key: string): boolean {
     return this.items.hasOwnProperty(key);
   }
 
   public count(): number {
-    return this.count;
+    return this.count_;
   }
 
   public add(key: string, value: T) {
     if(!this.items.hasOwnProperty(key))
-      this.count++;
+      this.count_++;
 
     this.items[key] = value;
   }
@@ -35,7 +35,7 @@ export class KeyedCollection<T> implements IKeyedCollection<T> {
   public remove(key: string): T {
     var val = this.items[key];
     delete this.items[key];
-    this.count--;
+    this.count_--;
     return val;
   }
 

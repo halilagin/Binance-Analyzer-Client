@@ -29,7 +29,7 @@ export class MCandle{
   middle:number;
   open:number;
   openTime:number;
-  symbol:number;
+  symbol:string;
   takerBaseVolume:number;
   takerQuoteVolume:number;
   timeInterval:number;

@@ -18,14 +18,17 @@ import { ElectronService } from './providers/electron.service';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import {VarNav} from "./components/varnav/VarNav";
-import {CandlePlot, Candle, CandlePlotG, CandlePlotSvg} from "./components/candleplot/CandlePlot";
+import {
+  UiCandlePlotSvg,UiCandlePlot, UiCandle
+} from "./components/candleplot/UiCandlePlot";
 import {TradeFlow} from "./components/tradeflow/TradeFlow";
 import {BasWebSocketService} from "./services/BasWebSocketService";
 import {BacLocalService} from "./services/BacLocalService";
 import {ServerInitProgressBar} from "./dialogs/ServerInitProgressBar";
 import {ServerInitProgressBarService} from "./services/ServerInitProgressBarService";
 import {WebSocketCandleReaderService} from "./services/WebSocketCandleReaderService";
-import {CandleCacheService} from "./components/candleplot/CandleCacheService";
+import {ServiceCandleCache} from "./components/candleplot/ServiceCandleCache";
+import {ServiceCandlePlotScale} from "./components/candleplot/ServiceCandlePlotScale";
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -37,12 +40,10 @@ export function HttpLoaderFactory(http: HttpClient) {
     AppComponent,
     HomeComponent,
     VarNav,
-    CandlePlot,
     TradeFlow,
-    Candle,
-    CandlePlotG,
-    CandlePlot,
-    CandlePlotSvg,
+    UiCandle,
+    UiCandlePlot,
+    UiCandlePlotSvg,
     ServerInitProgressBar
   ],
   imports: [
@@ -58,14 +59,15 @@ export function HttpLoaderFactory(http: HttpClient) {
       }
     })
   ],
-  entryComponents:[Candle],
+  entryComponents:[UiCandle],
   providers: [
     ElectronService,
     BasWebSocketService,
     BacLocalService,
     ServerInitProgressBarService,
     WebSocketCandleReaderService,
-    CandleCacheService
+    ServiceCandleCache,
+    ServiceCandlePlotScale
   ],
   bootstrap: [AppComponent]
 })

@@ -37,7 +37,8 @@
     "e2e": "protractor ./protractor.conf.js"
   },
   "dependencies": {
-    "angular2-uuid": "^1.1.1"
+    "angular2-uuid": "^1.1.1",
+    "d3-ng2-service": "^1.23.3"
   },
   "devDependencies": {
     "@angular/common": "5.2.0",

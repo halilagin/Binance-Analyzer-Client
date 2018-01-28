@@ -1,12 +1,12 @@
-import {MCandle} from "../../model/bac.frontend";
-import {Injectable} from "@angular/core";
-import {CandleCacheService} from "./CandleCacheService";
-import {Subject, Subscription, Observable} from "rxjs";
-import {KeyedCollection} from "../../model/collections";
 /**
  * Created by halil on 26/01/2018.
  */
 
+
+import {Injectable} from "@angular/core";
+import {Subject, Observable} from "rxjs";
+import {KeyedCollection} from "../../model/collections";
+import * as d3  from 'd3-ng2-service/src/bundle-d3';
 
 // circular cache
 // candles array is circular.
@@ -15,34 +15,47 @@ import {KeyedCollection} from "../../model/collections";
 
 export class CandlePlotScale{
   private uuid:string;
-  private subject:Subject<any>;
-  candleCacheSubscription: Subscription;
   private extent:number[]; //[minx,miny, maxx,maxy]
   private height:number=null;
-  private weight:number=null;
+  private width:number=null;
 
-  public scaleX=()=>{};
-  public scaleY=()=>{};
+  public scaleX=(val):number=>{return null;};
+  public scaleY=(val):number=>{return null;};
 
-  constructor(uuid:string, subject:Subject, candleCacheSubscription, extent:number[], width:number, height:number){
+  private d3ScaleY;
+  private d3ScaleX;
+
+  private cacheSize=500;
+
+  constructor(uuid:string, extent:number[], width:number, height:number){
+    this.d3ScaleY = d3.scaleLinear().domain([ extent[1]-Math.abs(extent[1])*0.1, extent[3]+Math.abs(extent[3])*0.1 ]).range([height,0]);
+    //this.d3ScaleX = d3.scaleLinear().domain([ extent[0]-Math.abs(extent[0])*0.1, extent[2]+Math.abs(extent[2])*0.1 ]).range([-4200,width]);
+
+    let ordinalDomain=[];
+    for (let i=0;i<this.cacheSize;i++){
+      ordinalDomain.push(extent[0]+i*60);
+    }
+
+
+    let ordinalRange =[];
+    for (let i=0;i<this.cacheSize;i++){
+      ordinalRange.push(-4200+i*10);
+    }
+    this.d3ScaleX = d3.scaleOrdinal().domain(ordinalDomain).range(ordinalRange);
     //extent: [minX:number, maxX:number,minY:number,maxY:number]
     //this.candleCacheSubscription = this.cacheService.getMessage().subscribe(message => this.candleCacheMessageHandler(message));
     this.uuid = uuid;
-    this.subject = subject;
-    this.candleCacheSubscription = candleCacheSubscription;
     this.extent = extent;
 
-    this.weight = weight;
+    this.width = width;
     this.height = height;
 
     this.scaleY = (val) =>{
-      let maxY = this.extent[1];
-      return (maxY-val)/this.height;
+      return this.d3ScaleY(val);
     };
 
     this.scaleX = (val) =>{
-      let maxX = this.extent[2];
-      return (maxX-val)/this.width;
+      return this.d3ScaleX(val);
     };
 
 
@@ -51,16 +64,14 @@ export class CandlePlotScale{
 
 
 @Injectable()
-export class CandlePlotScaleService {
+export class ServiceCandlePlotScale {
 
-  public candlePlotScales: KeyedCollection<CandlePlotScale>;
+  public scales: KeyedCollection<CandlePlotScale>;
 
   private subject = new Subject<any>();
-  candleCacheSubscription: Subscription;
 
-  constructor(private candleCacheService:CandleCacheService){
-    this.candleCacheSubscription = this.cacheService.getMessage().subscribe(message => this.candleCacheMessageHandler(message));
-
+  constructor(){
+      this.scales = new KeyedCollection<CandlePlotScale>();
   }
 
 
@@ -77,15 +88,15 @@ export class CandlePlotScaleService {
   }
 
   public initCandlePlotScale(uuid:string, extent:number[], width:number, height:number){
-    let cps = new CandlePlotScale(uuid, this.subject, this.candleCacheSubscription, extent, width, height);
-    this.candlePlotScales.add(message.plotUUID, cps);
+    let cps = new CandlePlotScale(uuid,  extent, width, height);
+    this.scales.add(uuid, cps);
   }
 
   public scaleX(uuid:string){
-    return this.candlePlotScales.item(uuid).scaleX;
+    return this.scales.item(uuid).scaleX;
   }
   public scaleY(uuid:string){
-    return this.candlePlotScales.item(uuid).scaleY;
+    return this.scales.item(uuid).scaleY;
   }
 
 

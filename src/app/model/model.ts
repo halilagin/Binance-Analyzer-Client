@@ -10,63 +10,92 @@ export class ObjectId{
   }
 }
 
-export class CandleUIModel  {
+export class MUiCandle {
 
 
-  public mcandle:MCandle;
+  public mcandle: MCandle;
 
 
   public x;
   public y;
 
 
-  private width:number=8;
-  private gwidth:number=5;
-  private gheight:number=5;
+  private width: number = 8;
+  private gwidth: number = 5;
+  private gheight: number = 5;
 
   private height;
   private translateString;
-  private topLine={x:0,y1:0,y2:0};
-  private bottomLine={x:0,y1:0,y2:0};
-  private top=0;
-  private bottom=0;
+  private topLine = {x: 0, y1: 0, y2: 0};
+  private bottomLine = {x: 0, y1: 0, y2: 0};
+  private top = 0;
+  private bottom = 0;
+  private recty=0;
 
-  public increase=false;
+  public increase = false;
+  public scale = 1;
 
-  constructor( mcandle:MCandle) {
+  constructor(mcandle: MCandle, sx: (val: number) => any, sy: (val: number) => any) {
     this.mcandle = mcandle;
-    this.init();
+
+    this.init(sx, sy);
   }
 
 
-  init() {
-
-    if (this.mcandle.open>=this.mcandle.close){
-      this.top = this.mcandle.open;
-      this.bottom = this.mcandle.close;
-      this.increase = false;
+  init(sx: (val: number) => any, sy: (val: number) => any) {
+    //x,y are the position of the g.
+    this.scale = 1;
+    if (sx == null && sy == null) {
+      //no scale given
+      this.x = this.mcandle.openTime;
+      this.y = this.mcandle.low;
+      if (this.mcandle.open >= this.mcandle.close) {
+        this.top = this.mcandle.open;
+        this.bottom = this.mcandle.close;
+        this.increase = false;
+      } else {
+        this.top = this.mcandle.close;
+        this.bottom = this.mcandle.open;
+        this.increase = true;
+      }
+      this.gheight = Math.abs(this.mcandle.high - this.mcandle.low);
+      this.height = Math.abs(this.mcandle.open - this.mcandle.close);
+      this.topLine.x = this.x + this.width / 2;
+      this.topLine.y1 = this.mcandle.high;
+      this.topLine.y2 = this.top;
+      this.bottomLine.x = this.x + this.width / 2;
+      this.bottomLine.y1 = this.mcandle.low;
+      this.bottomLine.y2 = this.bottom;
     } else {
-      this.top = this.mcandle.close;
-      this.bottom = this.mcandle.open;
-      this.increase = true;
+      //there exist scale functions, sx,sy.
+      this.x = sx(this.mcandle.openTime);
+      this.y = sy(this.mcandle.low);
+      if (this.mcandle.open >= this.mcandle.close) {
+        this.top = this.mcandle.open;
+        this.bottom = this.mcandle.close;
+        this.increase = false;
+      } else {
+        this.top = this.mcandle.close;
+        this.bottom = this.mcandle.open;
+        this.increase = true;
+      }
+      this.gheight = Math.abs(sy(this.mcandle.high) - sy(this.mcandle.low));
+      this.height = Math.abs(sy(this.mcandle.open) - sy(this.mcandle.close));
+      this.topLine.x = this.width / 2;
+      this.topLine.y1 = sy(this.mcandle.high);
+      this.topLine.y2 = sy(this.top);
+      this.bottomLine.x = this.width / 2;
+      this.bottomLine.y1 = sy(this.mcandle.low);
+      this.bottomLine.y2 = sy(this.bottom);
+
+      //this.bottomLine.y2 is the bottom of the top line which is top of the rectangle.
+      //we cannot use this.topLine.y2 because the rect is drawn from low y to high y.
+      this.recty = this.bottomLine.y2;
+
     }
-
-    this.x = 0;
-    this.y = this.increase?this.mcandle.open:this.mcandle.close;
-    this.gheight = Math.abs(this.mcandle.high-this.mcandle.low);
-    this.height = Math.abs(this.mcandle.open-this.mcandle.close);
-
-    this.topLine.x = this.x+this.width/2;
-    this.topLine.y1 = this.mcandle.high;
-    this.topLine.y2 = this.top;
-
-    this.bottomLine.x = this.x+this.width/2;
-    this.bottomLine.y1 = this.mcandle.low;
-    this.bottomLine.y2 = this.bottom;
   }
 
 }
-
 
 export class CandleCacheMessage{
   public action:string;
@@ -75,5 +104,31 @@ export class CandleCacheMessage{
 
 }
 
+
+
+export class MUiCandlePlotSvg{
+  public viewBoxX:number;
+  public viewBoxY:number;
+  public viewBoxWidth:number;
+  public viewBoxHeight:number;
+
+  public viewBoxString:string;
+
+  public mouse={offsetX:-1,offsetY:-1};
+  public mouseSwipeMove={x1:-1,x2:-1,y1:-1,y2:-1};
+
+
+
+  public symbol:string="XLMETH";
+  public timeInterval:number=60;
+  public width:number=800;
+  public height:number=480;
+  public metric:string='px';
+  public uuid:string=null;
+
+  public viewBox(){
+    return `${this.viewBoxX} ${this.viewBoxY} ${this.viewBoxWidth} ${this.viewBoxHeight}`;
+  }
+}
 
 
