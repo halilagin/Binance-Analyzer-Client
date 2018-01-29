@@ -32,14 +32,14 @@ export class CandlePlotScale{
     //this.d3ScaleX = d3.scaleLinear().domain([ extent[0]-Math.abs(extent[0])*0.1, extent[2]+Math.abs(extent[2])*0.1 ]).range([-4200,width]);
 
     let ordinalDomain=[];
-    for (let i=0;i<this.cacheSize;i++){
+    for (let i=0;i<this.cacheSize;i++){//items are in max first, min last order.
       ordinalDomain.push(extent[0]+i*60);
     }
 
 
     let ordinalRange =[];
     for (let i=0;i<this.cacheSize;i++){
-      ordinalRange.push(-4200+i*10);
+      ordinalRange.push(800-i*10);
     }
     this.d3ScaleX = d3.scaleOrdinal().domain(ordinalDomain).range(ordinalRange);
     //extent: [minX:number, maxX:number,minY:number,maxY:number]

@@ -1,3 +1,4 @@
+import * as d3  from 'd3-ng2-service/src/bundle-d3';
 
 import {MCandle} from "./bac.frontend";
 
@@ -34,6 +35,8 @@ export class MUiCandle {
 
   public increase = false;
   public scale = 1;
+  public gScaleY;
+  public rectHeight;
 
   constructor(mcandle: MCandle, sx: (val: number) => any, sy: (val: number) => any) {
     this.mcandle = mcandle;
@@ -43,6 +46,7 @@ export class MUiCandle {
 
 
   init(sx: (val: number) => any, sy: (val: number) => any) {
+
     //x,y are the position of the g.
     this.scale = 1;
     if (sx == null && sy == null) {
@@ -67,30 +71,38 @@ export class MUiCandle {
       this.bottomLine.y1 = this.mcandle.low;
       this.bottomLine.y2 = this.bottom;
     } else {
+      this.height = Math.abs(sy(this.mcandle.high)- sy(this.mcandle.low))+1;//5 to avoid zero height. it is in pixel
+
+      this.gScaleY = d3.scaleLinear().domain([this.mcandle.low*0.9,this.mcandle.high*1.1]).range([this.height,0]);
+      let gy = this.gScaleY;
+      this.rectHeight=Math.abs(gy(this.mcandle.open)- gy(this.mcandle.close));
+      if (this.rectHeight<0.5)
+        this.rectHeight=0.5;
+
       //there exist scale functions, sx,sy.
       this.x = sx(this.mcandle.openTime);
-      this.y = sy(this.mcandle.low);
-      if (this.mcandle.open >= this.mcandle.close) {
-        this.top = this.mcandle.open;
-        this.bottom = this.mcandle.close;
-        this.increase = false;
+      this.y = sy(this.mcandle.high);
+      this.increase = this.mcandle.open < this.mcandle.close;
+      if (this.increase) {
+        this.topLine.y2 = gy(this.mcandle.close);//rect top
+        this.bottomLine.y2 = gy(this.mcandle.open);//rect bottom
+
       } else {
-        this.top = this.mcandle.close;
-        this.bottom = this.mcandle.open;
-        this.increase = true;
+        this.topLine.y2 = gy(this.mcandle.open);//rect top
+        this.bottomLine.y2 = gy(this.mcandle.close);//rect bottom
+
       }
-      this.gheight = Math.abs(sy(this.mcandle.high) - sy(this.mcandle.low));
-      this.height = Math.abs(sy(this.mcandle.open) - sy(this.mcandle.close));
+      this.topLine.y1 = 0;
+      this.bottomLine.y1 = this.height;
       this.topLine.x = this.width / 2;
-      this.topLine.y1 = sy(this.mcandle.high);
-      this.topLine.y2 = sy(this.top);
       this.bottomLine.x = this.width / 2;
-      this.bottomLine.y1 = sy(this.mcandle.low);
-      this.bottomLine.y2 = sy(this.bottom);
+      this.recty = this.topLine.y2;
+
+
 
       //this.bottomLine.y2 is the bottom of the top line which is top of the rectangle.
       //we cannot use this.topLine.y2 because the rect is drawn from low y to high y.
-      this.recty = this.bottomLine.y2;
+
 
     }
   }
@@ -127,7 +139,8 @@ export class MUiCandlePlotSvg{
   public uuid:string=null;
 
   public viewBox(){
-    return `${this.viewBoxX} ${this.viewBoxY} ${this.viewBoxWidth} ${this.viewBoxHeight}`;
+    this.viewBoxString = `${this.viewBoxX} ${this.viewBoxY} ${this.viewBoxWidth} ${this.viewBoxHeight}`;
+    return this.viewBoxString;
   }
 }
 

@@ -23,7 +23,8 @@ import * as d3  from 'd3-ng2-service/src/bundle-d3';
   styleUrls: ['./UiCandlePlot.scss'],
   host:{
     '[attr.transform]':'translate()',
-    '[attr.id]':'htmlId()'
+    '[attr.id]':'htmlId()',
+    '[attr.class]':"'UiCandle'"
 
   },
   template: `
@@ -36,10 +37,10 @@ import * as d3  from 'd3-ng2-service/src/bundle-d3';
     <!--<svg:g [attr.transform]="translate()">-->
       <!--<g Candle></g>-->
       <!--<svg:circle [attr.r]="5" [attr.cx]="0" [attr.cy]="0" stroke-width="12" class="progress__meter" />-->
-    <svg:rect [attr.x]="0" [attr.y]="model.recty" [attr.width]="model.width" [attr.height]="model.height" style="fill:rgb(255,0,0);stroke-width:0;" />
-    <svg:line [attr.x1]="model.topLine.x" [attr.x2]="model.topLine.x" [attr.y1]="model.topLine.y1" [attr.y2]="model.topLine.y2"  style="stroke:rgb(255,0,0);stroke-width:1;" />
-    <svg:line [attr.x1]="model.bottomLine.x" [attr.x2]="model.bottomLine.x" [attr.y1]="model.bottomLine.y1" [attr.y2]="model.bottomLine.y2"  style="stroke:rgb(255,0,0);stroke-width:1;" />
-    <svg:text [attr.x]="0" [attr.y]="model.recty"  style="fill:rgb(0,0,0);stroke-width:0;font-size:6px;" > {{model.mcandle.openTime}}</svg:text>
+    <svg:rect [attr.x]="0" [attr.y]="model.recty" [attr.width]="model.width" [attr.height]="model.rectHeight" [attr.class]="rectCssClass()" />
+    <svg:line [attr.x1]="model.topLine.x" [attr.x2]="model.topLine.x" [attr.y1]="model.topLine.y1" [attr.y2]="model.topLine.y2"  [attr.class]="lineCssClass()" />
+    <svg:line [attr.x1]="model.bottomLine.x" [attr.x2]="model.bottomLine.x" [attr.y1]="model.bottomLine.y1" [attr.y2]="model.bottomLine.y2"  [attr.class]="lineCssClass()" />
+    <!--<svg:text [attr.x]="0" [attr.y]="model.recty"  style="fill:rgb(0,0,0);stroke-width:0;font-size:6px;" > {{model.mcandle.openTime}}</svg:text>-->
     
     <!--</svg:g>-->
   `
@@ -62,7 +63,6 @@ export class UiCandle implements OnInit {
   @Input() scale:number;
 
 
-  private translateString:String;
 
   candleCacheSubscription: Subscription;
 
@@ -72,10 +72,16 @@ export class UiCandle implements OnInit {
 
   }
 
+  rectCssClass(){
+    return this.model.increase?"rectIncrease":"rectDecrease";
+  }
 
+  lineCssClass(){
+    return this.model.increase?"lineIncrease":"lineDecrease";
+  }
 
   htmlId(){
-    return `cndl_${this.timeInterval}_${this.openTime}`;
+    return `cndl_${this.model.mcandle.timeInterval}_${this.model.mcandle.openTime}`;
   }
 
   candleCacheMessageHandler(message:any){
@@ -89,8 +95,6 @@ export class UiCandle implements OnInit {
 
   public init(mcandle:MCandle, sx, sy){
     this.model = new MUiCandle(mcandle, sx, sy);
-
-    this.translateString= this.translate();
   }
 
   public ngOnInit() {
@@ -219,18 +223,16 @@ export class UiCandlePlotSvg implements OnInit {
     this.scaleService.initCandlePlotScale(this.uuid,this.cacheService.extent(this.uuid),this.model.width, this.model.height);
 
     let candles_ = this.cacheService.readLastInserteds(this.uuid);
-    candles_.forEach((c,i)=>{
+    for (let i=0;i<candles_.length;i++){
+      let c = candles_[i];
       this.createCandleComponent(c, i, +this.width, +this.height);
-    });
+      // console.log("projectcandles:",+this.width, +this.height);
+      // console.log("projectcandles.extent:",this.cacheService.extent(this.uuid));
+      //
+      // console.log("projectcandles:",c);
+    }
 
-    // let mcandle = candles[0];
-    // mcandle.low = 10;
-    // mcandle.high = 90;
-    // mcandle.open = 80;
-    // mcandle.close= 75;
-    // mcandle.openTime = 17;
-    // mcandle.timeInterval = 60;
-    // let candleComponent = this.createCandleComponent(mcandle);
+
   }
 
 
@@ -290,7 +292,7 @@ export class UiCandlePlotSvg implements OnInit {
     this.model.height = +this.height;
     this.model.symbol = this.symbol;
     this.model.timeInterval = +this.timeInterval;
-
+    this.model.viewBox();
     this.wsService.sendMessage(JSON.stringify({
       "action":"registerCandlePlot",
       plotParams:{
@@ -332,7 +334,7 @@ export class UiCandlePlotSvg implements OnInit {
       this.model.viewBoxX +=  Math.pow(Math.abs(moveLength),1.1);
 
     //this.model.viewBoxX=+this.viewBoxX+moveLength ;
-    this.model.viewBoxString = this.model.viewBox();
+    this.model.viewBox();
   }
 }
 
