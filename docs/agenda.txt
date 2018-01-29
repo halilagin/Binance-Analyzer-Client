@@ -1,0 +1,1 @@
+20180129.0036: candle ui finished. viewbox.scale.extent should be adapted. while changing the viewbox, the scale should adapt accordingly. writer thread and reader thread bug fix needed. test multiple plots.
