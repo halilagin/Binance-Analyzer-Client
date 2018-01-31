@@ -212,14 +212,12 @@ export class CandleCache{
           this.setMinCandleX(c);
       }
 
-      console.log("checking maxx:", c.openTime,this.extent);
 
       this.insert(c);
     });
     this.lastInsertCount = cs.length;
 
 
-    console.log("after.insert.collection. scale.extent determined:",this.extent);
     // let message:CandleCacheMessage= new CandleCacheMessage();
     // message.action="newCollectionInserted";
     // message.data = [this.minX, this.maxX, this.minY.low, this.maxY.high];
@@ -289,7 +287,6 @@ export class ServiceCandleCache {
   }
 
   public extent(uuid:string) {
-    console.log("retrieved.extent",this.caches.item(uuid).extent);
     return this.caches.item(uuid).extent;
   }
 

@@ -31,10 +31,8 @@ export class HomeComponent implements OnInit {
     //console.log("websocket.server.message:",this.serverMessage);
     this.basMessage = JSON.parse(this.serverMessage.data);
 
-    if (this.basMessage.action=="subscribe") {
-      this.bacLocalService.clientState.bacClientIndex = this.basMessage.clientIndex;
-      this.bacLocalService.clientState.bacClientId = this.basMessage.id;
-      console.log(this.bacLocalService.clientState);
+    if (this.basMessage.action=="startSubscription") {
+      this.subscribeMe();
     } else if (this.basMessage.action=="ServerInitializerStarted") {
       this.bacLocalService.clientState.bacServerInitializationState = EnumBacServerInitializationState.STARTED;
       this.serverInitializerProgressBarMessageService.sendMessage(EnumBacServerInitializationState.STARTED);
@@ -49,6 +47,44 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  startSubscription(){
+    if (this.bacLocalService.clientState.bacClientId==undefined ||  this.bacLocalService.clientState.bacClientId==null){
+      //first time subscription
+      this.bacLocalService.clientState.bacClientIndex = this.basMessage.clientIndex;
+      this.bacLocalService.clientState.bacClientId = this.basMessage.clientId;
+
+      let message = {
+        "action":"finishNewSubscription",
+        plotParams:{
+          "symbol":this.symbol,
+          "timeInterval":this.timeInterval
+        },
+        clientInfo:{
+          clientId:this.basMessage.clientId
+        }
+      };
+      console.log("finishNewSubscription",message);
+      this.wsService.sendMessage(JSON.stringify(message));
+
+    } else {
+      let message = {
+        "action":"finishReSubscription",
+        plotParams:{
+          "symbol":this.symbol,
+          "timeInterval":this.timeInterval
+        },
+        clientInfo:{
+          clientIndex:this.bacLocalService.clientState.bacClientId,
+          clientIdPreviouslySubscribed:this.bacLocalService.clientState.bacClientId,
+          clientIdNewlyBeingSubscribed:this.basMessage.clientId
+        }
+      };
+      console.log("finishReSubscription",message);
+      this.wsService.sendMessage(JSON.stringify(message));
+
+    }
+
+  }
 
   sendMessage(message:any){
     this.wsService.sendMessage(message);

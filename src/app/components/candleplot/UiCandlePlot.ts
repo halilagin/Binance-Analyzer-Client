@@ -108,11 +108,11 @@ export class UiCandle implements OnInit {
       mcandle.openTime=+this.openTime;
       mcandle.timeInterval=+this.timeInterval;
       this.init(mcandle, null, null);
-      console.log("candle instantiated in a regular way.")
+      //console.log("candle instantiated in a regular way.")
     } else {
       //programmatically instantiated by a factory. init method called instead.
       //do nothing
-      console.log("candle programmatically instantiated:openTime", this.model.mcandle.openTime);
+      //console.log("candle programmatically instantiated:openTime", this.model.mcandle.openTime);
     }
 
 
@@ -282,7 +282,6 @@ export class UiCandlePlotSvg implements OnInit {
     this.model.viewBoxHeight = +this.viewBoxHeight;
     this.model.mouse = {offsetX:-1,offsetY:-1};
     this.model.mouseSwipeMove = {x1:-1,x2:-1,y1:-1,y2:-1};
-    console.log("candleplotsvg:viewbox",this.model.viewBox());
 
 
 
@@ -356,10 +355,7 @@ export class UiCandlePlot implements OnInit {
 
 
   constructor() {
-
-
     let d3ScaleY = d3.scaleLinear().domain([ 40,80]).range([0,1]);
-    console.log("d3scaley.val(60)==0.5:", d3ScaleY(60));
   }
 
   ngOnInit() {
