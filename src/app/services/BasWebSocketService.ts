@@ -8,43 +8,102 @@ import {Injectable} from "@angular/core";
 @Injectable()
 export class BasWebSocketService {
   ws:WebSocket;
-
+  socketIsReady:boolean=false;
   createObservableSocket(url:string):Observable<MessageEvent>{
     this.ws = new WebSocket(url);
     return new Observable(observer =>{
       this.ws.onmessage = (event) => {observer.next(event); };
       this.ws.onerror = (event) => {observer.error(event); console.log("socket.error:",event);};
       this.ws.onclose = (event) => {observer.complete(); console.log("socket.closed:",event);};
+      this.ws.onopen = (event) => { this.socketIsReady=true;};
 
     });
-  }
-
-
-
-  // Make the function wait until the connection is made...
-  waitForSocketConnection(socket, callback){
-  setTimeout(
-     () =>{
-      if (socket.readyState === WebSocket.OPEN) {
-        console.log("Connection is made");
-        if(callback != null){
-          callback();
-        }
-        return;
-
-      } else {
-        console.log("wait for connection...");
-        this.waitForSocketConnection(socket, callback);
-      }
-
-    }, 500); // wait 500 milisecond for the connection...
   }
 
 
   sendMessage(message:any) {
-    this.waitForSocketConnection(this.ws, ()=>{
-      this.ws.send(message);
-    });
-    //this.ws.send(message);
+    // let sleep= async function(msec){
+    //   return new Promise(resolve => setTimeout(resolve, msec));
+    // };
+    // while(this.socketIsReady==false){
+    //   console.log("sending a message needs a ready connection");
+    //   //setTimeout(()=>{},200);
+    //   await sleep(200);
+    // }
+    // if (this.socketIsReady)
+    //   this.ws.send(message);
+
+
+    let cs = JSON.parse(localStorage.getItem("clientState"));
+
+    var intervalID = setInterval(()=>{
+      if (this.socketIsReady ) {
+        console.log("sending the message", message);
+        this.ws.send(JSON.stringify(message));
+        clearInterval(intervalID);
+      } else {
+        console.log("sending a message needs a ready connection", cs);
+      }
+
+    }, 200);
   }
+
+
+  startNewSubscription(clientId){
+
+    let message = {
+      "action":"startNewSubscription",
+      "plotParams":{
+
+      },
+      "clientInfo":{
+        clientId:clientId
+      }
+    };
+    console.log("startNewSubscription",clientId);
+
+    var intervalID = setInterval(()=>{
+      if (this.socketIsReady ) {
+        console.log("sending the message", message);
+        this.ws.send(JSON.stringify(message));
+        clearInterval(intervalID);
+      } else {
+        console.log("sending a message needs a ready connection");
+      }
+
+    }, 200);
+  }
+
+
+  startReSubscription(clientIdPreviouslySubscribed,clientIdNewlyBeingSubscribed){
+
+
+    let message = {
+      "action":"startReSubscription",
+      "plotParams":{
+
+      },
+      "clientInfo":{
+        "clientId":clientIdPreviouslySubscribed,
+        "clientIdPreviouslySubscribed":clientIdPreviouslySubscribed,
+        "clientIdNewlyBeingSubscribed":clientIdNewlyBeingSubscribed
+      }
+    };
+
+    console.log("startReSubscription",clientIdPreviouslySubscribed,clientIdNewlyBeingSubscribed);
+
+    var intervalID = setInterval(()=>{
+      if (this.socketIsReady ) {
+        console.log("sending the message", message);
+        this.ws.send(JSON.stringify(message));
+        clearInterval(intervalID);
+      } else {
+        console.log("sending a message needs a ready connection");
+      }
+
+    }, 200);
+  }
+
+
+
 }

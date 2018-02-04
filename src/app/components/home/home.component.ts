@@ -14,7 +14,6 @@ export class HomeComponent implements OnInit {
 
   serverMessage:MessageEvent=null;
   basMessage:any=null;
-  public ws:WebSocket;
 
   constructor(public wsService:BasWebSocketService,
               private bacLocalService:BacLocalService,
@@ -32,7 +31,11 @@ export class HomeComponent implements OnInit {
     this.basMessage = JSON.parse(this.serverMessage.data);
 
     if (this.basMessage.action=="startSubscription") {
-      this.subscribeMe();
+      this.startSubscription();
+    } if (this.basMessage.action=="ackNewSubscription") {
+      this.ackNewSubscription();
+    } if (this.basMessage.action=="ackReSubscription") {
+      this.ackReSubscription();
     } else if (this.basMessage.action=="ServerInitializerStarted") {
       this.bacLocalService.clientState.bacServerInitializationState = EnumBacServerInitializationState.STARTED;
       this.serverInitializerProgressBarMessageService.sendMessage(EnumBacServerInitializationState.STARTED);
@@ -47,48 +50,42 @@ export class HomeComponent implements OnInit {
     }
   }
 
+
+
+  ackReSubscription(){
+    this.bacLocalService.clientState.bacClientId = this.basMessage.clientId;
+    this.bacLocalService.clientState.bacClientTempId = null;
+    console.log("ackReSubscription, clientId",this.bacLocalService.clientState.bacClientId);
+    this.bacLocalService.clientIdReceived(this.bacLocalService.clientState);
+
+  }
+
+  ackNewSubscription(){
+    console.log("ackNewSubscription, clientId",this.basMessage.clientId);
+
+    this.bacLocalService.clientState.bacClientId = this.basMessage.clientId;
+    this.bacLocalService.clientState.bacClientTempId = null;
+    this.bacLocalService.clientIdReceived(this.bacLocalService.clientState);
+
+  }
   startSubscription(){
-    if (this.bacLocalService.clientState.bacClientId==undefined ||  this.bacLocalService.clientState.bacClientId==null){
-      //first time subscription
-      this.bacLocalService.clientState.bacClientIndex = this.basMessage.clientIndex;
-      this.bacLocalService.clientState.bacClientId = this.basMessage.clientId;
+    // if (this.bacLocalService.clientState.bacClientId==undefined ||  this.bacLocalService.clientState.bacClientId==null){
+    //   //first time subscription
+    //   this.bacLocalService.clientState.bacClientTempId = this.basMessage.clientId;
+    //   this.wsService.startNewSubscription(this.basMessage.clientId);
+    // } else {//resubscription
+    //   let clientIdPreviouslySubscribed=this.bacLocalService.clientState.bacClientId;
+    //   let clientIdNewlyBeingSubscribed=this.basMessage.clientId;
+    //   this.bacLocalService.clientState.bacClientId=null;
+    //   this.wsService.startReSubscription(clientIdPreviouslySubscribed, clientIdNewlyBeingSubscribed);
+    // }
 
-      let message = {
-        "action":"finishNewSubscription",
-        plotParams:{
-          "symbol":this.symbol,
-          "timeInterval":this.timeInterval
-        },
-        clientInfo:{
-          clientId:this.basMessage.clientId
-        }
-      };
-      console.log("finishNewSubscription",message);
-      this.wsService.sendMessage(JSON.stringify(message));
-
-    } else {
-      let message = {
-        "action":"finishReSubscription",
-        plotParams:{
-          "symbol":this.symbol,
-          "timeInterval":this.timeInterval
-        },
-        clientInfo:{
-          clientIndex:this.bacLocalService.clientState.bacClientId,
-          clientIdPreviouslySubscribed:this.bacLocalService.clientState.bacClientId,
-          clientIdNewlyBeingSubscribed:this.basMessage.clientId
-        }
-      };
-      console.log("finishReSubscription",message);
-      this.wsService.sendMessage(JSON.stringify(message));
-
-    }
+      this.bacLocalService.clientState.bacClientId = null;
+      this.bacLocalService.clientState.bacClientTempId = this.basMessage.clientId;
+      this.wsService.startNewSubscription(this.basMessage.clientId);
 
   }
 
-  sendMessage(message:any){
-    this.wsService.sendMessage(message);
-  }
 
   ngOnInit() {
   }

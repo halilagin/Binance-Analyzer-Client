@@ -14,6 +14,7 @@ export const BacServerInitializationState: typeof EnumBacServerInitializationSta
 export class BacClientState{
   isLoggedIn:boolean=false;
   bacClientId:string=null;
+  bacClientTempId:string=null;//this is client id while subscription process is ongoing.
   bacClientIndex:number=-1;
   bacServerInitializationState:EnumBacServerInitializationState=EnumBacServerInitializationState.NOTRELEVANT;
 }

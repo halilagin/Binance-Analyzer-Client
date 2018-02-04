@@ -137,6 +137,7 @@ export class MUiCandlePlotSvg{
   public height:number=480;
   public metric:string='px';
   public uuid:string=null;
+  public startStreaming=false;
 
   public viewBox(){
     this.viewBoxString = `${this.viewBoxX} ${this.viewBoxY} ${this.viewBoxWidth} ${this.viewBoxHeight}`;

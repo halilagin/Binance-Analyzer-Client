@@ -2,10 +2,13 @@ import { Injectable } from "@angular/core";
 import { Observable } from "rxjs/Observable";
 import {RequestOptions, Http, Headers } from "@angular/http";
 import {BacClientState} from "../model/bac.frontend";
+import {Subject} from "rxjs";
 
 
 @Injectable()
 export class BacLocalService {
+  private subject = new Subject<any>();
+
   clientState:BacClientState = new BacClientState();
   constructor() {
     let existingClientState:any = localStorage.getItem("clientState");
@@ -19,6 +22,20 @@ export class BacLocalService {
       let ecs = JSON.parse(existingClientState);
       this.save(ecs);
     }
+  }
+
+
+
+  sendMessage(message: any) {
+    this.subject.next(message);
+  }
+
+  clearMessage() {
+    this.subject.next();
+  }
+
+  getMessage(): Observable<any> {
+    return this.subject.asObservable();
   }
 
 
@@ -40,6 +57,19 @@ export class BacLocalService {
     localStorage.removeItem("clientState");
 
     localStorage.setItem("clientState",JSON.stringify(newState));
+
+  }
+
+  clientIdReceived(newState:BacClientState){
+    this.save(newState);
+    if (this.clientState.bacClientId!==null){
+      this.sendMessage({"clientId":this.clientState.bacClientId,"action":"clientIdRegistered"});
+    }
+  }
+
+  clearClientState(){
+    console.log("client state is cleared.");
+    localStorage.removeItem("clientState");
   }
 
   doLogout(){

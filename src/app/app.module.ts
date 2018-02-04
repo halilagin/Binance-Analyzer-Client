@@ -19,8 +19,17 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import {VarNav} from "./components/varnav/VarNav";
 import {
-  UiCandlePlotSvg,UiCandlePlot, UiCandle
+  UiCandlePlot
 } from "./components/candleplot/UiCandlePlot";
+
+import {
+  UiCandlePlotSvg
+} from "./components/candleplot/UiCandlePlotSvg";
+
+import {
+  UiCandle
+} from "./components/candleplot/UiCandle";
+
 import {TradeFlow} from "./components/tradeflow/TradeFlow";
 import {BasWebSocketService} from "./services/BasWebSocketService";
 import {BacLocalService} from "./services/BacLocalService";
