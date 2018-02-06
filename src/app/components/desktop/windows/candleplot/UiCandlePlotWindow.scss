@@ -7,44 +7,11 @@
 }
 
 .UiCandlePlotWindowBGRect{
-  fill:#252525;
+  fill:#fefefe;
 }
 
-.UiCandle {
-
-}
+@import "~app/components/desktop/windows/candleplot/UiCandlePlotFrame.scss";
 
 
 
-.rectIncrease{
-  stroke-width: 1;
-  stroke:green;
-  fill:none;
-}
 
-.rectDecrease{
-  stroke-width: 1;
-  stroke:red;
-  fill:none;
-}
-
-.lineIncrease{
-  stroke-width: 1;
-  stroke:green;
-  fill:none;
-}
-
-.lineDecrease{
-  stroke-width: 1;
-  stroke:red;
-  fill:none;
-}
-
-
-
-.streamingNotStartedText {
-  font-size:16px;
-  //font-weight:bold;
-  stroke:none;
-  fill:#dedede;
-}

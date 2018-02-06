@@ -38,6 +38,7 @@ import {ServerInitProgressBarService} from "./services/ServerInitProgressBarServ
 import {WebSocketCandleReaderService} from "./services/WebSocketCandleReaderService";
 import {ServiceCandleCache} from "./components/desktop/windows/candleplot/ServiceCandleCache";
 import {ServiceCandlePlotScale} from "./components/desktop/windows/candleplot/ServiceCandlePlotScale";
+import {UiCandlePlotFrame} from "./components/desktop/windows/candleplot/UiCandlePlotFrame";
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -53,6 +54,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     UiCandle,
     UiPlotDesktop,
     UiCandlePlotWindow,
+    UiCandlePlotFrame,
     ServerInitProgressBar
   ],
   imports: [

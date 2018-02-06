@@ -118,7 +118,33 @@ export class CandleCacheMessage{
 
 
 
-export class MUiCandlePlotSvg{
+export class MUiCandlePlotWindow{
+  public viewBoxX:number;
+  public viewBoxY:number;
+  public viewBoxWidth:number;
+  public viewBoxHeight:number;
+  public width:number=800;
+  public height:number=480;
+  public viewBoxString:string;
+  public uuid:string=null;
+
+  public mouse={offsetX:-1,offsetY:-1};
+  public mouseSwipeMove={x1:-1,x2:-1,y1:-1,y2:-1};
+
+  public symbol:string="XLMETH";
+  public timeInterval:number=60;
+
+
+  public viewBox(){
+    this.viewBoxString = `${this.viewBoxX} ${this.viewBoxY} ${this.viewBoxWidth} ${this.viewBoxHeight}`;
+    return this.viewBoxString;
+  }
+}
+
+
+
+export class MUiCandlePlotFrame{
+
   public viewBoxX:number;
   public viewBoxY:number;
   public viewBoxWidth:number;
@@ -143,6 +169,7 @@ export class MUiCandlePlotSvg{
     this.viewBoxString = `${this.viewBoxX} ${this.viewBoxY} ${this.viewBoxWidth} ${this.viewBoxHeight}`;
     return this.viewBoxString;
   }
+
 }
 
 

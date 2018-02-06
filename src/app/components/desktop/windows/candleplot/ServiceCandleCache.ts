@@ -1,6 +1,6 @@
 import {MCandle} from "../../../../model/bac.frontend";
 import {Injectable} from "@angular/core";
-import {CandleCacheMessage, MUiCandlePlotSvg} from "../../../../model/model";
+import {CandleCacheMessage, MUiCandlePlotWindow} from "../../../../model/model";
 import {Subject, Observable} from "rxjs";
 import {KeyedCollection} from "../../../../model/collections";
 /**
@@ -305,7 +305,7 @@ export class ServiceCandleCache {
     this.caches.item(uuid).setMinY(c.low);
   }
 
-  public insertCollection(uuid:string,cs:MCandle[], muiCandlePlotSvg:MUiCandlePlotSvg){
+  public insertCollection(uuid:string,cs:MCandle[], muiCandlePlotSvg:MUiCandlePlotWindow){
     this.caches.item(uuid).insertCollection(cs);
 
   }

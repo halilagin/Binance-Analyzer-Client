@@ -1,0 +1,46 @@
+
+
+.UiCandlePlotFrame{
+  background-color:#252525;
+
+}
+
+
+.UiCandle {
+
+}
+
+
+
+.rectIncrease{
+  stroke-width: 1;
+  stroke:green;
+  fill:none;
+}
+
+.rectDecrease{
+  stroke-width: 1;
+  stroke:red;
+  fill:none;
+}
+
+.lineIncrease{
+  stroke-width: 1;
+  stroke:green;
+  fill:none;
+}
+
+.lineDecrease{
+  stroke-width: 1;
+  stroke:red;
+  fill:none;
+}
+
+
+
+.streamingNotStartedText {
+  font-size:16px;
+  //font-weight:bold;
+  stroke:none;
+  fill:#dedede;
+}

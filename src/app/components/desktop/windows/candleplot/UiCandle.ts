@@ -2,7 +2,7 @@ import {
   Component, OnInit, Input, ViewChild, forwardRef, Renderer, ComponentFactoryResolver,
   ElementRef, ViewContainerRef, Inject, ReflectiveInjector, HostListener, HostBinding, Host
 } from '@angular/core';
-import {MUiCandle, ObjectId, MUiCandlePlotSvg} from "../../../../model/model";
+import {MUiCandle, ObjectId, MUiCandlePlotWindow} from "../../../../model/model";
 import {BasWebSocketService} from "../../../../services/BasWebSocketService";
 import {BacLocalService} from "../../../../services/BacLocalService";
 //import { v4 as uuid } from 'uuid';
