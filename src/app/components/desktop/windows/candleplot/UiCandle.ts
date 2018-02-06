@@ -2,14 +2,14 @@ import {
   Component, OnInit, Input, ViewChild, forwardRef, Renderer, ComponentFactoryResolver,
   ElementRef, ViewContainerRef, Inject, ReflectiveInjector, HostListener, HostBinding, Host
 } from '@angular/core';
-import {MUiCandle, ObjectId, MUiCandlePlotSvg} from "../../model/model";
-import {BasWebSocketService} from "../../services/BasWebSocketService";
-import {BacLocalService} from "../../services/BacLocalService";
+import {MUiCandle, ObjectId, MUiCandlePlotSvg} from "../../../../model/model";
+import {BasWebSocketService} from "../../../../services/BasWebSocketService";
+import {BacLocalService} from "../../../../services/BacLocalService";
 //import { v4 as uuid } from 'uuid';
 import {Subscription} from "rxjs";
-import {WebSocketCandleReaderService} from "../../services/WebSocketCandleReaderService";
+import {WebSocketCandleReaderService} from "../../../../services/WebSocketCandleReaderService";
 import { UUID } from 'angular2-uuid';
-import {MCandle} from "../../model/bac.frontend";
+import {MCandle} from "../../../../model/bac.frontend";
 import {ServiceCandleCache, CandleCache} from "./ServiceCandleCache";
 import {ServiceCandlePlotScale} from "./ServiceCandlePlotScale";
 import * as d3  from 'd3-ng2-service/src/bundle-d3';
@@ -20,7 +20,7 @@ import * as d3  from 'd3-ng2-service/src/bundle-d3';
 
 @Component({
   selector: 'svg:g[UiCandle]',
-  styleUrls: ['./UiCandlePlot.scss'],
+  styleUrls: ['UiCandlePlotWindow.scss'],
   host:{
     '[attr.transform]':'translate()',
     '[attr.id]':'htmlId()',

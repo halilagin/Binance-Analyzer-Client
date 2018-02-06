@@ -19,16 +19,16 @@ import { AppComponent } from './app.component';
 import { HomeComponent } from './components/home/home.component';
 import {VarNav} from "./components/varnav/VarNav";
 import {
-  UiCandlePlot
-} from "./components/candleplot/UiCandlePlot";
+  UiPlotDesktop
+} from "./components/desktop/UiPlotDesktop";
 
 import {
-  UiCandlePlotSvg
-} from "./components/candleplot/UiCandlePlotSvg";
+  UiCandlePlotWindow
+} from "./components/desktop/windows/candleplot/UiCandlePlotWindow";
 
 import {
   UiCandle
-} from "./components/candleplot/UiCandle";
+} from "./components/desktop/windows/candleplot/UiCandle";
 
 import {TradeFlow} from "./components/tradeflow/TradeFlow";
 import {BasWebSocketService} from "./services/BasWebSocketService";
@@ -36,8 +36,8 @@ import {BacLocalService} from "./services/BacLocalService";
 import {ServerInitProgressBar} from "./dialogs/ServerInitProgressBar";
 import {ServerInitProgressBarService} from "./services/ServerInitProgressBarService";
 import {WebSocketCandleReaderService} from "./services/WebSocketCandleReaderService";
-import {ServiceCandleCache} from "./components/candleplot/ServiceCandleCache";
-import {ServiceCandlePlotScale} from "./components/candleplot/ServiceCandlePlotScale";
+import {ServiceCandleCache} from "./components/desktop/windows/candleplot/ServiceCandleCache";
+import {ServiceCandlePlotScale} from "./components/desktop/windows/candleplot/ServiceCandlePlotScale";
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -51,8 +51,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     VarNav,
     TradeFlow,
     UiCandle,
-    UiCandlePlot,
-    UiCandlePlotSvg,
+    UiPlotDesktop,
+    UiCandlePlotWindow,
     ServerInitProgressBar
   ],
   imports: [

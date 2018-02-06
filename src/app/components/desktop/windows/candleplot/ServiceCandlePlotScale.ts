@@ -5,7 +5,7 @@
 
 import {Injectable} from "@angular/core";
 import {Subject, Observable} from "rxjs";
-import {KeyedCollection} from "../../model/collections";
+import {KeyedCollection} from "../../../../model/collections";
 import * as d3  from 'd3-ng2-service/src/bundle-d3';
 
 // circular cache

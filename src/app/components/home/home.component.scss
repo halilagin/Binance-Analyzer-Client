@@ -23,17 +23,17 @@
   height: 100%;
   margin:0;
 
-  .plot_container{
-    float:left;
-    width: 70%;
-
-
-  }
-
-  .tradeflow_container{
-    float:right;
-    width: 30%;
-  }
+  //.plot_container{
+  //  float:left;
+  //  width: 70%;
+  //
+  //
+  //}
+  //
+  //.tradeflow_container{
+  //  float:right;
+  //  width: 30%;
+  //}
 }
 
-
+@import "~app/components/desktop/UiPlotDesktop.scss";

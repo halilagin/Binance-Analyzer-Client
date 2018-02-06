@@ -2,14 +2,14 @@ import {
   Component, OnInit, Input, ViewChild, forwardRef, Renderer, ComponentFactoryResolver,
   ElementRef, ViewContainerRef, Inject, ReflectiveInjector, HostListener, HostBinding, Host, OnDestroy
 } from '@angular/core';
-import {MUiCandle, ObjectId, MUiCandlePlotSvg} from "../../model/model";
-import {BasWebSocketService} from "../../services/BasWebSocketService";
-import {BacLocalService} from "../../services/BacLocalService";
+import {MUiCandle, ObjectId, MUiCandlePlotSvg} from "../../../../model/model";
+import {BasWebSocketService} from "../../../../services/BasWebSocketService";
+import {BacLocalService} from "../../../../services/BacLocalService";
 //import { v4 as uuid } from 'uuid';
 import {Subscription} from "rxjs";
-import {WebSocketCandleReaderService} from "../../services/WebSocketCandleReaderService";
+import {WebSocketCandleReaderService} from "../../../../services/WebSocketCandleReaderService";
 import { UUID } from 'angular2-uuid';
-import {MCandle} from "../../model/bac.frontend";
+import {MCandle} from "../../../../model/bac.frontend";
 import {ServiceCandleCache, CandleCache} from "./ServiceCandleCache";
 import {ServiceCandlePlotScale} from "./ServiceCandlePlotScale";
 import * as d3  from 'd3-ng2-service/src/bundle-d3';
@@ -21,14 +21,18 @@ import {UiCandle} from "./UiCandle";
 
 
 @Component({
-  selector: 'svg[UiCandlePlotSvg]',
+  selector: 'svg[UiCandlePlotWindow]',
   host:{
-    'class':"UiCandlePlotSvg",
-    '[attr.viewBox]':"model.viewBoxString"
+    '[attr.viewBox]':"model.viewBoxString",
+    '[attr.x]':"x()",
+    '[attr.y]':"y()",
+
 
   },
-  styleUrls: ['UiCandlePlot.scss'],
+  styleUrls: ['UiCandlePlotWindow.scss'],
   template: `
+  <svg:rect [attr.x]="model.viewBoxX" [attr.y]="0" height="480" width="800" class="UiCandlePlotWindowBGRect"></svg:rect>
+
   <svg:g *ngIf="model.startStreaming==false" [attr.transform]="initializationMessageTransform()">
     <svg:text  #initializationMessage class="streamingNotStartedText" >Waiting for the connection...</svg:text>
   </svg:g>
@@ -38,7 +42,7 @@ import {UiCandle} from "./UiCandle";
 
 
 })
-export class UiCandlePlotSvg implements OnInit, OnDestroy {
+export class UiCandlePlotWindow implements OnInit, OnDestroy {
 
   @Input() viewBoxX:number;
   @Input() viewBoxY:number;
@@ -94,6 +98,14 @@ export class UiCandlePlotSvg implements OnInit, OnDestroy {
 
   }
 
+
+  x(){
+    return "20";
+  }
+
+  y(){
+    return "20";
+  }
 
   initializationMessageTransform(){
     let w = this.model.width/2;//(this.initializationMessageEl.nativeElement.offsetWidth/2);

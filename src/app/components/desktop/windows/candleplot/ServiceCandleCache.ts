@@ -1,8 +1,8 @@
-import {MCandle} from "../../model/bac.frontend";
+import {MCandle} from "../../../../model/bac.frontend";
 import {Injectable} from "@angular/core";
-import {CandleCacheMessage, MUiCandlePlotSvg} from "../../model/model";
+import {CandleCacheMessage, MUiCandlePlotSvg} from "../../../../model/model";
 import {Subject, Observable} from "rxjs";
-import {KeyedCollection} from "../../model/collections";
+import {KeyedCollection} from "../../../../model/collections";
 /**
  * Created by halil on 26/01/2018.
  */
