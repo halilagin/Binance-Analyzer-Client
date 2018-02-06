@@ -143,7 +143,9 @@ export class MUiCandlePlotWindow{
 
 
 
-export class MUiCandlePlotFrame{
+export class MUiCandlePlotStreamingFrame{
+  public x:number;
+  public y:number;
 
   public viewBoxX:number;
   public viewBoxY:number;

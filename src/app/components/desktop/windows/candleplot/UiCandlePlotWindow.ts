@@ -34,7 +34,7 @@ import {UiCandle} from "./UiCandle";
   template: `
   <svg:rect [attr.x]="0" [attr.y]="0" [attr.height]="model.height" [attr.width]="model.width" class="UiCandlePlotWindowBGRect"></svg:rect>
 
-<svg UiCandlePlotFrame draggable="true" [attr.width]="plotWidth" [attr.height]="plotHeight"  viewBoxX="model.viewBoxX" viewBoxY="model.viewBoxY" viewBoxWidth="plotWidth" viewBoxHeight="plotHeight"   class="UiCandlePlotFrame"   >
+<svg UiCandlePlotStreamingFrame [x]="plotX" [y]="plotY"  [width]="plotWidth" [height]="plotHeight"      >
 
   <!--<svg:g UiCandlePlotFrame [attr.width]="plotWidth" [attr.height]="plotHeight"  [attr.x]="plotX" [attr.y]="plotY" class="UiCandlePlotFrame">-->
   <!--</svg:g>-->
@@ -86,12 +86,14 @@ export class UiCandlePlotWindow implements OnInit {
   }
 
 
+
+
   x_(){
-    return "20";
+    return  this.x = 20;
   }
 
   y_(){
-    return "20";
+    return this.y = 20;
   }
 
   plot_Width(){
@@ -99,7 +101,7 @@ export class UiCandlePlotWindow implements OnInit {
   }
 
   plot_Height(){
-    return  this.plotHeight =  +this.model.height*0.9;
+    return  this.plotHeight =  +this.model.height*0.8;
   }
 
   plot_X(){
@@ -107,7 +109,7 @@ export class UiCandlePlotWindow implements OnInit {
   }
 
   plot_Y(){
-    return  this.plotY =  this.yscale(this.model.height*0.1)
+    return  this.plotY =  this.yscale(this.model.height*0.9)
   }
 
   initPlotDimensions(){

@@ -2,7 +2,7 @@ import {
   Component, OnInit, Input, ViewChild, forwardRef, Renderer, ComponentFactoryResolver,
   ElementRef, ViewContainerRef, Inject, ReflectiveInjector, HostListener, HostBinding, Host, OnDestroy
 } from '@angular/core';
-import {MUiCandle, ObjectId, MUiCandlePlotFrame} from "../../../../model/model";
+import {MUiCandle, ObjectId, MUiCandlePlotStreamingFrame} from "../../../../model/model";
 import {BasWebSocketService} from "../../../../services/BasWebSocketService";
 import {BacLocalService} from "../../../../services/BacLocalService";
 //import { v4 as uuid } from 'uuid';
@@ -21,18 +21,20 @@ import {UiCandle} from "./UiCandle";
 
 
 @Component({
-  selector: 'svg[UiCandlePlotFrame]',
+  selector: 'svg[UiCandlePlotStreamingFrame]',
   host:{
     '[attr.viewBox]':"model.viewBoxString",
-    '[attr.x]':"x()",
-    '[attr.y]':"y()"
-
+    '[attr.class]':"UiCandlePlotStreamingFrame",
+    '[attr.draggable]':'true',
+    '[attr.x]':"model.x",
+    '[attr.y]':"model.y",
+    '[attr.width]':'model.width',
+    '[attr.height]':'model.height'
 
   },
-  styleUrls: ['UiCandlePlotFrame.scss'],
+  styleUrls: ['UiCandlePlotStreamingFrame.scss'],
   template: `
-  <svg:rect [attr.x]="model.viewBoxX" [attr.y]="0" height="480" width="800" class="UiCandlePlotWindowBGRect"></svg:rect>
-
+  <svg:rect [attr.x]="model.viewBoxX" [attr.y]="0" [attr.height]="height" [attr.width]="width" class="UiCandlePlotWindowBGRect"></svg:rect>
   <svg:g *ngIf="model.startStreaming==false" [attr.transform]="initializationMessageTransform()">
     <svg:text  #initializationMessage class="streamingNotStartedText" >Waiting for the connection...</svg:text>
   </svg:g>
@@ -42,14 +44,12 @@ import {UiCandle} from "./UiCandle";
 
 
 })
-export class UiCandlePlotFrame implements OnInit, OnDestroy {
+export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
 
-  @Input() viewBoxX:number;
-  @Input() viewBoxY:number;
-  @Input() viewBoxWidth:number;
-  @Input() viewBoxHeight:number;
+  @Input() x:number;
+  @Input() y:number;
 
-  model:MUiCandlePlotFrame;
+  model:MUiCandlePlotStreamingFrame;
 
   @Input() symbol:string="XLMETH";
   @Input() timeInterval:number=60;
@@ -80,8 +80,7 @@ export class UiCandlePlotFrame implements OnInit, OnDestroy {
 
   ) {
 
-    this.model = new MUiCandlePlotFrame();
-
+    this.model = new MUiCandlePlotStreamingFrame();
     //this.parent = parent;
     this.uuid = UUID.UUID();
 
@@ -98,14 +97,6 @@ export class UiCandlePlotFrame implements OnInit, OnDestroy {
 
   }
 
-
-  x(){
-    return "20";
-  }
-
-  y(){
-    return "20";
-  }
 
   initializationMessageTransform(){
     let w = this.model.width/2;//(this.initializationMessageEl.nativeElement.offsetWidth/2);
@@ -187,12 +178,16 @@ export class UiCandlePlotFrame implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.model.x = +this.x;
+    this.model.y = +this.y;
+
     this.model.viewBoxX = 0;
-    this.model.viewBoxY = +this.viewBoxY;
-    this.model.viewBoxWidth = +this.viewBoxWidth;
-    this.model.viewBoxHeight = +this.viewBoxHeight;
+    this.model.viewBoxY = 0;
+    this.model.viewBoxWidth = +this.width;
+    this.model.viewBoxHeight = +this.height;
     this.model.mouse = {offsetX:-1,offsetY:-1};
     this.model.mouseSwipeMove = {x1:-1,x2:-1,y1:-1,y2:-1};
+
 
 
 
