@@ -14,10 +14,10 @@ import * as d3  from 'd3-ng2-service/src/bundle-d3';
 
 
 export class CandlePlotScale{
-  private uuid:string;
-  private extent:number[]; //[minx,miny, maxx,maxy]
-  private height:number=null;
-  private width:number=null;
+  public uuid:string;
+  public extent:number[]; //[minx,miny, maxx,maxy]
+  public height:number=null;
+  public width:number=null;
 
   public scaleX=(val):number=>{return null;};
   public scaleY=(val):number=>{return null;};
@@ -26,6 +26,8 @@ export class CandlePlotScale{
   private d3ScaleX;
 
   private cacheSize=500;
+
+
 
   constructor(uuid:string, extent:number[], width:number, height:number){
     this.d3ScaleY = d3.scaleLinear().domain([ extent[1]-Math.abs(extent[1])*0.1, extent[3]+Math.abs(extent[3])*0.1 ]).range([height,0]);
@@ -39,7 +41,7 @@ export class CandlePlotScale{
 
     let ordinalRange =[];
     for (let i=0;i<this.cacheSize;i++){
-      ordinalRange.push(800-i*10);
+      ordinalRange.push(width-i*10-100);//TODO: this shows the last candles position. replace the constant. 10 is the width of the candle. 100 is to move a bit to the left.
     }
     this.d3ScaleX = d3.scaleOrdinal().domain(ordinalDomain).range(ordinalRange);
     //extent: [minX:number, maxX:number,minY:number,maxY:number]
@@ -89,6 +91,12 @@ export class ServiceCandlePlotScale {
 
   public initCandlePlotScale(uuid:string, extent:number[], width:number, height:number){
     let cps = new CandlePlotScale(uuid,  extent, width, height);
+    this.scales.add(uuid, cps);
+  }
+
+  public changeScale(uuid:string, extent){
+    let old_:CandlePlotScale = this.scales.item(uuid);
+    let cps = new CandlePlotScale(uuid,  extent, old_.width, old_.height);
     this.scales.add(uuid, cps);
   }
 

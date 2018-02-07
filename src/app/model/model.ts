@@ -1,6 +1,6 @@
-import * as d3  from 'd3-ng2-service/src/bundle-d3';
 
 import {MCandle} from "./bac.frontend";
+import * as d3  from 'd3-ng2-service/src/bundle-d3';
 
 
 export class ObjectId{
@@ -172,6 +172,34 @@ export class MUiCandlePlotStreamingFrame{
     return this.viewBoxString;
   }
 
+}
+
+
+export class MuiPriceAxis {
+  public domain:number[]=[]; //[min,max]
+  public range:number[]=[]; //[min,max]
+  public tickCount:number=5;
+  public scale:(number)=>number;
+  public ticks:number[]=[];
+  public tickPositions:number[]=[];
+
+  constructor(domain:number[], range:number[], tickCount:number){
+    this.domain = [ domain[0]-Math.abs(domain[0])*0.1, domain[1]+Math.abs(domain[1])*0.1 ];;
+    this.range = range
+    this.tickCount=tickCount;
+
+    this.scale = d3.scaleLinear().domain(domain).range(range);
+    let binWidth = (domain[1]-domain[0])/this.tickCount;
+
+    this.ticks=[];
+    this.tickPositions=[];
+    for (let i=0;i<this.tickCount;i++){
+      let n = domain[0]+i*binWidth+binWidth/2;
+      this.ticks.push(n);
+      this.tickPositions.push(this.scale(n));
+    }
+
+  }
 }
 
 

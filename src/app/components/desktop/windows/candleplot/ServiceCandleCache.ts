@@ -44,26 +44,30 @@ export class CandleCache{
   }
 
 
-  public setMinX(val:number){
+  public setMinX(val:number, fireEvent:boolean=false){
     this.extent[0]=val;
   }
-  public setMinY(val:number){
+  public setMinY(val:number, fireEvent:boolean=false){
     this.extent[1]=val;
-    let message:CandleCacheMessage= new CandleCacheMessage();
-    message.action="minYChanged";
-    message.data = val;
-    this.sendMessage(message);
+    if (fireEvent) {
+      let message:CandleCacheMessage= new CandleCacheMessage();
+      message.action="scaleChanged";
+      message.data = this.extent;
+      this.sendMessage(message);
+    }
   }
 
-  public setMaxX(val:number){
+  public setMaxX(val:number, fireEvent:boolean=false){
     this.extent[2]=val;
   }
-  public setMaxY(val:number){
+  public setMaxY(val:number, fireEvent:boolean=false){
     this.extent[3]=val;
-    let message:CandleCacheMessage= new CandleCacheMessage();
-    message.action="maxYChanged";
-    message.data = val;
-    this.sendMessage(message);
+    if (fireEvent) {
+      let message:CandleCacheMessage= new CandleCacheMessage();
+      message.action="scaleChanged";
+      message.data = this.extent;
+      this.sendMessage(message);
+    }
   }
 
   public getMinX(){
@@ -81,26 +85,26 @@ export class CandleCache{
   }
 
 
-  public setMaxCandleY(c:MCandle){
+  public setMaxCandleY(c:MCandle, fireEvent:boolean=false){
     this.maxY = c;
-    this.setMaxY(c.high);
+    this.setMaxY(c.high,fireEvent);
 
   }
 
-  public setMinCandleY(c:MCandle){
+  public setMinCandleY(c:MCandle, fireEvent:boolean=false){
     this.minY = c;
-    this.setMinY(c.low);
+    this.setMinY(c.low,fireEvent);
 
   }
 
-  public setMaxCandleX(c:MCandle){
+  public setMaxCandleX(c:MCandle, fireEvent:boolean=false){
     this.maxX = c;
-    this.setMaxX(c.openTime);
+    this.setMaxX(c.openTime,fireEvent);
   }
 
-  public setMinCandleX(c:MCandle){
+  public setMinCandleX(c:MCandle, fireEvent:boolean=false){
     this.minX = c;
-    this.setMinX(c.openTime);
+    this.setMinX(c.openTime,fireEvent);
 
   }
 
@@ -217,6 +221,11 @@ export class CandleCache{
     });
     this.lastInsertCount = cs.length;
 
+    let message:CandleCacheMessage= new CandleCacheMessage();
+    message.action="scaleChanged";
+    message.data = this.extent;
+    this.sendMessage(message);
+
 
     // let message:CandleCacheMessage= new CandleCacheMessage();
     // message.action="newCollectionInserted";
@@ -305,7 +314,7 @@ export class ServiceCandleCache {
     this.caches.item(uuid).setMinY(c.low);
   }
 
-  public insertCollection(uuid:string,cs:MCandle[], muiCandlePlotSvg:MUiCandlePlotWindow){
+  public insertCollection(uuid:string,cs:MCandle[]){
     this.caches.item(uuid).insertCollection(cs);
 
   }

@@ -55,7 +55,7 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
   @Input() timeInterval:number=60;
   @Input() width:string='800';
   @Input() height:string='480';
-  uuid:string=null;
+  @Input() uuid:string=null;
 
   candleReaderSubscription: Subscription;
   @ViewChild("gcontainer") gcontainerEl:ElementRef;
@@ -83,7 +83,6 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
     this.model = new MUiCandlePlotStreamingFrame();
     //this.parent = parent;
     this.uuid = UUID.UUID();
-
 
 
     this.candleReaderSubscription = this.candleReaderService.getMessage().subscribe(message => this.candleReaderMessageHandler(message));
@@ -125,7 +124,7 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
   }
 
   projectCandles(candles:MCandle[]){
-    this.cacheService.insertCollection(this.uuid, candles, this.model);
+    this.cacheService.insertCollection(this.uuid, candles);
     this.scaleService.initCandlePlotScale(this.uuid,this.cacheService.extent(this.uuid),this.model.width, this.model.height);
 
     let candles_ = this.cacheService.readLastInserteds(this.uuid);
@@ -178,6 +177,8 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+
+
     this.model.x = +this.x;
     this.model.y = +this.y;
 
