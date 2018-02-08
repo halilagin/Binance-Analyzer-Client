@@ -1,6 +1,7 @@
 
 import {MCandle} from "./bac.frontend";
 import * as d3  from 'd3-ng2-service/src/bundle-d3';
+import {KeyedCollection} from "./collections";
 
 
 export class ObjectId{
@@ -134,6 +135,7 @@ export class MUiCandlePlotWindow{
   public symbol:string="XLMETH";
   public timeInterval:number=60;
 
+  public title:string;
 
   public viewBox(){
     this.viewBoxString = `${this.viewBoxX} ${this.viewBoxY} ${this.viewBoxWidth} ${this.viewBoxHeight}`;
@@ -182,24 +184,107 @@ export class MuiPriceAxis {
   public scale:(number)=>number;
   public ticks:number[]=[];
   public tickPositions:number[]=[];
+  //1M=60, 5M=300,15M=900, 30M=1800, 1H=3600, 2H=7200, 4H=14400,6H=21600, 12H=43200, 1D=86400, 1W=7*86400
+  public timeInterval:number;
+
 
   constructor(domain:number[], range:number[], tickCount:number){
-    this.domain = [ domain[0]-Math.abs(domain[0])*0.1, domain[1]+Math.abs(domain[1])*0.1 ];;
-    this.range = range
+
+
+    this.domain = domain;
+    this.range = [ range[0]-Math.abs(range[0])*0.05, range[1]+Math.abs(range[1])*0.05 ];
     this.tickCount=tickCount;
 
-    this.scale = d3.scaleLinear().domain(domain).range(range);
+    this.scale = d3.scaleLinear().domain(this.domain).range(this.range);
     let binWidth = (domain[1]-domain[0])/this.tickCount;
 
     this.ticks=[];
     this.tickPositions=[];
-    for (let i=0;i<this.tickCount;i++){
-      let n = domain[0]+i*binWidth+binWidth/2;
+    for (let i=0;i<(this.tickCount+1);i++){
+      let n = domain[0]+i*binWidth;//+binWidth/2;
       this.ticks.push(n);
       this.tickPositions.push(this.scale(n));
     }
 
   }
+
+}
+
+
+
+export class MuiTimeAxis {
+  public domain:number[]=[]; //[min,max]
+  public range:number[]=[]; //[min,max]
+  public tickCount:number=5;
+  public scale:(number)=>number;
+  public ticks:number[]=[];
+  public tickPositions:number[]=[];
+  public timeInterval:number;//in second
+
+  //this is need to determine to when to update time axis
+  // lets have 1m setup. for this, we will have 5 ticks
+  // since this.timeInterval=5*m
+  //each time interval setup has different coefficient which is 5 in this case.
+  //this has will store the <'1M',5> pairs.
+  public updateThresholdCounts:KeyedCollection<number>;
+  public timeIntervalInSecond:KeyedCollection<number>;
+
+
+  constructor(timeInterval:string, domain:number[], range:number[]){
+    this.updateThresholdCounts = new   KeyedCollection<number>();
+    this.timeIntervalInSecond = new   KeyedCollection<number>();
+
+    this.populateUpdateThresholdCounts();
+
+    this.timeInterval = this.timeIntervalInSecond.item(timeInterval);
+
+    this.domain = domain;
+    this.range = [ range[0]-Math.abs(range[0])*0.05, range[1]+Math.abs(range[1])*0.05 ];
+    this.tickCount=(domain[1]-domain[0])/this.timeInterval/this.updateThresholdCounts.item(timeInterval);
+
+
+
+    this.scale = d3.scaleLinear().domain(this.domain).range(this.range);
+    let binWidth = (domain[1]-domain[0])/this.tickCount;
+
+    this.ticks=[];
+    this.tickPositions=[];
+    for (let i=0;i<(this.tickCount+1);i++){
+      let n = domain[0]+i*binWidth;//+binWidth/2;
+      this.ticks.push(n);
+      this.tickPositions.push(this.scale(n));
+    }
+
+  }
+
+  populateUpdateThresholdCounts(){
+    //see setTimeInterval
+
+    this.timeIntervalInSecond.add('1M',60);
+    this.timeIntervalInSecond.add('5M',5*60); // 20/5=4
+    this.timeIntervalInSecond.add('30M',30*60);
+    this.timeIntervalInSecond.add('1H',60*60);
+    this.timeIntervalInSecond.add('2H',2*60*60);
+    this.timeIntervalInSecond.add('4H',4*60*60);
+    this.timeIntervalInSecond.add('12H',12*60*60);
+    this.timeIntervalInSecond.add('1D',1*24*60*60);
+    this.timeIntervalInSecond.add('1W',7*1*24*60*60);
+
+    this.updateThresholdCounts.add('1M',10);
+    this.updateThresholdCounts.add('5M',6); // 20/5=4
+    this.updateThresholdCounts.add('30M',8);
+    this.updateThresholdCounts.add('1H',6);
+    this.updateThresholdCounts.add('2H',8);
+    this.updateThresholdCounts.add('4H',12);
+    this.updateThresholdCounts.add('12H',6);
+    this.updateThresholdCounts.add('1D',7);
+    this.updateThresholdCounts.add('1W',4);
+
+
+
+  }
+
+
 }
 
 

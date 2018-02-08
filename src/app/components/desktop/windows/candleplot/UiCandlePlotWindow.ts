@@ -16,6 +16,7 @@ import * as d3  from 'd3-ng2-service/src/bundle-d3';
 import {UiCandle} from "./UiCandle";
 import {UiPriceAxis} from "../../fragments/UiPriceAxis";
 import {UiCandlePlotStreamingFrame} from "./UiCandlePlotStreamingFrame";
+import {UiTimeAxis} from "../../fragments/UiTimeAxis";
 // see: https://www.sarasoueidan.com/blog/svg-coordinate-systems/
 // see: https://github.com/ohjames/rxjs-websockets
 
@@ -34,18 +35,34 @@ import {UiCandlePlotStreamingFrame} from "./UiCandlePlotStreamingFrame";
   },
   styleUrls: ['UiCandlePlotWindow.scss'],
   template: `
-  <svg:rect [attr.x]="0" [attr.y]="0" [attr.height]="model.height" [attr.width]="model.width" class="UiCandlePlotWindowBGRect"></svg:rect>
+  <svg:rect [attr.x]="0" [attr.y]="0" [attr.height]="model.height" [attr.width]="model.width" class="UiCandlePlotStreamingFrame"></svg:rect>
   <svg UiCandlePlotStreamingFrame #candlePlot [x]="plotX" [y]="plotY"  [width]="plotWidth" [height]="plotHeight"       ></svg>
   <svg UiPriceAxis #priceAxis
-        layout="vertical" 
+        [layout]="'vertical'" 
         [x]="priceAxisX" 
         [y]="plotY"  
         [width]="priceAxisWidth" 
         [height]="plotHeight" 
         ></svg>
-
-  <!--<svg:g UiCandlePlotFrame [attr.width]="plotWidth" [attr.height]="plotHeight"  [attr.x]="plotX" [attr.y]="plotY" class="UiCandlePlotFrame">-->
-  <!--</svg:g>-->
+  <svg UiTimeAxis #timeAxis
+        [layout]="'horizontal'" 
+        [timeInterval]="'1M'"
+        [x]="0" 
+        [y]="timeAxisY"  
+        [width]="plotWidth" 
+        [height]="timeAxisHeight"  
+        ></svg>
+  
+  
+  
+  <!--<svg  #rightBottomCorner [attr.transform]="rightBottomCornerTransformString()">-->
+    <svg  #rightBottomCorner [attr.x]="plotWidth" [attr.y]="timeAxisY" [attr.height]="timeAxisHeight" [attr.width]="priceAxisWidth">
+       <!--<svg:rect [attr.x]="0" [attr.y]="0" [attr.height]="timeAxisHeight" [attr.width]="priceAxisWidth" style="fill:red;">-->
+       <!---->
+<!--</svg:rect>-->
+       <svg:text x="0" [attr.y]="timeAxisHeight" style="fill:#2dcd2d;">{{model.title}}</svg:text>
+       
+  </svg>
   `
 
 
@@ -72,12 +89,17 @@ export class UiCandlePlotWindow implements OnInit {
   plotHeight:number;
   public priceAxisX: number;
   public priceAxisWidth:number;
-
+  public timeAxisY:number;
+  public timeAxisHeight:number;
+  public timeAxisWidth:number;
   public scaleServiceSubscription:Subscription;
   public cahceServiceSubscription:Subscription;
 
   @ViewChild('priceAxis') priceAxis: UiPriceAxis;
   @ViewChild('candlePlot') candlePlot: UiCandlePlotStreamingFrame;
+
+  @ViewChild('timeAxis') timeAxis: UiTimeAxis;
+
 
   constructor(
     @Inject(ViewContainerRef) viewContainerRef,
@@ -104,13 +126,17 @@ export class UiCandlePlotWindow implements OnInit {
 
 
   cahceServiceMessageHandler(message){
-      if (message.action=="scaleChanged" && message.plotUUID==this.candlePlot.uuid ){
-        let extent = message.data;
-        console.log("new.extent:", extent);
+    let extent = message.data;
+
+    if (message.action=="scaleChanged" && message.plotUUID==this.candlePlot.uuid ){
         this.scaleService.changeScale(message.plotUUID, extent);
-        let scaleDomain = [extent[1],extent[3]];
-        this.priceAxis.changeScale(scaleDomain);
+        let priceDomain = [extent[1],extent[3]];
+        this.priceAxis.changeScale(priceDomain);
       }
+
+      let timeDomain = [extent[2]-60*this.timeAxis.timeIntervalInSecond(),extent[2]];
+      let timeRange=[0,this.candlePlot.model.width];
+      this.timeAxis.changeScale(this.timeAxis.timeInterval, timeDomain, timeRange );
 
   }
 
@@ -152,10 +178,31 @@ export class UiCandlePlotWindow implements OnInit {
     return this.priceAxisWidth = +this.model.width*0.1;
   }
 
+
+  timeAxis_Y(){
+    return this.timeAxisY = this.plotY+this.plotHeight;
+  }
+
+  timeAxis_Height(){
+    return this.timeAxisHeight = +this.model.height*0.05;
+  }
+
+  timeAxis_Width(){
+    //return this.timeAxisWidth = this.plotWidth+this.priceAxisWidth;
+    return this.timeAxisWidth = this.plotWidth;
+  }
+
+  rightBottomCornerTransformString(){
+    return `translate(${this.plotWidth},${this.timeAxisY})`;
+  }
+
+
   initPlotDimensions(){
     this.plot_X();this.plot_Y();this.plot_Width();this.plot_Height();
 
     this.priceAxis_X();this.priceAxis_Width();
+
+    this.timeAxis_Y();this.timeAxis_Height(); this.timeAxis_Width();
   }
 
   ngOnInit() {
@@ -175,12 +222,13 @@ export class UiCandlePlotWindow implements OnInit {
     this.model.height = +this.height;
     this.model.symbol = this.symbol;
     this.model.timeInterval = +this.timeInterval;
-    this.model.viewBox();
+    this.model.title = this.symbol;
 
     this.xscale = d3.scaleLinear().domain([ 0,this.model.width ]).range([0,this.model.width]);
     this.yscale = d3.scaleLinear().domain([ 0,this.model.height ]).range([this.model.height,0]);
-    this.initPlotDimensions();
 
+    this.model.viewBox();
+    this.initPlotDimensions();
 
 
   }

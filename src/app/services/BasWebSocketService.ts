@@ -38,7 +38,6 @@ export class BasWebSocketService {
 
     var intervalID = setInterval(()=>{
       if (this.socketIsReady ) {
-        console.log("sending the message", message);
         this.ws.send(JSON.stringify(message));
         clearInterval(intervalID);
       } else {
@@ -64,7 +63,6 @@ export class BasWebSocketService {
 
     var intervalID = setInterval(()=>{
       if (this.socketIsReady ) {
-        console.log("sending the message", message);
         this.ws.send(JSON.stringify(message));
         clearInterval(intervalID);
       } else {
@@ -94,7 +92,6 @@ export class BasWebSocketService {
 
     var intervalID = setInterval(()=>{
       if (this.socketIsReady ) {
-        console.log("sending the message", message);
         this.ws.send(JSON.stringify(message));
         clearInterval(intervalID);
       } else {

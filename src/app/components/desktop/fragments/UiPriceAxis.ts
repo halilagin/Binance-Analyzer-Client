@@ -19,7 +19,7 @@ import {Currency8DigitPipe} from "../pipes/Pipes"
   },
   styleUrls: ['UiPriceAxis.scss'],
   template: `
-    <svg:rect [attr.x]="0" [attr.y]="0" [attr.height]="height" [attr.width]="width" class="UiCandlePlotWindowBGRect"></svg:rect>
+    <svg:rect [attr.x]="0" [attr.y]="0" [attr.height]="height" [attr.width]="width" class="UiCandlePlotStreamingFrame"></svg:rect>
     
 
     <svg:g *ngFor="let tick of model.ticks;let i=index" [attr.transform]="translateString(model.tickPositions[i])">
@@ -69,7 +69,6 @@ export class UiPriceAxis implements OnInit {
       this.model = new MuiPriceAxis(domain, [0,+this.width], tickCount );
 
     //this.model.ticksScaled = [10,50,100,150,200];
-    console.log("scaleChanged:",this.model.ticks);
   }
 
 

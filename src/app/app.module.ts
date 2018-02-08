@@ -41,6 +41,7 @@ import {ServiceCandlePlotScale} from "./components/desktop/windows/candleplot/Se
 import {UiCandlePlotStreamingFrame} from "./components/desktop/windows/candleplot/UiCandlePlotStreamingFrame";
 import {UiPriceAxis} from "./components/desktop/fragments/UiPriceAxis";
 import {Currency8DigitPipe} from "./components/desktop/pipes/Pipes";
+import {UiTimeAxis} from "./components/desktop/fragments/UiTimeAxis";
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -58,6 +59,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     UiCandlePlotWindow,
     UiCandlePlotStreamingFrame,
     UiPriceAxis,
+    UiTimeAxis,
     ServerInitProgressBar,
     Currency8DigitPipe
   ],
