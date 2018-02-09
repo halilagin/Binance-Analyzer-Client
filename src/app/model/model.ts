@@ -4,6 +4,66 @@ import * as d3  from 'd3-ng2-service/src/bundle-d3';
 import {KeyedCollection} from "./collections";
 
 
+
+export class MConstants{
+  //this is need to determine to when to update time axis
+  // lets have 1m setup. for this, we will have 5 ticks
+  // since this.timeInterval=5*m
+  //each time interval setup has different coefficient which is 5 in this case.
+  //this has will store the <'1M',5> pairs.
+  public updateThresholdCounts:KeyedCollection<number>;
+  public timeIntervalInSecond:KeyedCollection<number>;
+
+  constructor(){
+    this.updateThresholdCounts = new KeyedCollection<number>()
+    this.timeIntervalInSecond = new KeyedCollection<number>()
+    this.populateUpdateThresholdCounts();
+  }
+
+  populateUpdateThresholdCounts(){
+    //see setTimeInterval
+
+    this.timeIntervalInSecond.add('1M',60);
+    this.timeIntervalInSecond.add('5M',5*60); // 20/5=4
+    this.timeIntervalInSecond.add('30M',30*60);
+    this.timeIntervalInSecond.add('1H',60*60);
+    this.timeIntervalInSecond.add('2H',2*60*60);
+    this.timeIntervalInSecond.add('4H',4*60*60);
+    this.timeIntervalInSecond.add('12H',12*60*60);
+    this.timeIntervalInSecond.add('1D',1*24*60*60);
+    this.timeIntervalInSecond.add('1W',7*1*24*60*60);
+
+    this.updateThresholdCounts.add('1M',10);
+    this.updateThresholdCounts.add('5M',6); // 20/5=4
+    this.updateThresholdCounts.add('30M',8);
+    this.updateThresholdCounts.add('1H',6);
+    this.updateThresholdCounts.add('2H',8);
+    this.updateThresholdCounts.add('4H',12);
+    this.updateThresholdCounts.add('12H',6);
+    this.updateThresholdCounts.add('1D',7);
+    this.updateThresholdCounts.add('1W',4);
+
+
+
+  }
+
+}
+
+export const MCONSTANTS:MConstants = new MConstants();
+
+export class MCandleViewBox{
+  public firstIndex:number=-1;
+  public lastIndex:number=-1;
+  public viewBoxWidth:number;//these two needed to calculate the candles in viewBox
+  public candleWidth:number;
+  constructor(viewBoxWidth:number, candleWidth:number) {
+    this.viewBoxWidth = viewBoxWidth;
+    this.candleWidth = candleWidth;
+
+  }
+}
+
+
 export class ObjectId{
   public str:string=null;
 
@@ -169,6 +229,12 @@ export class MUiCandlePlotStreamingFrame{
   public uuid:string=null;
   public startStreaming=false;
 
+  public candleViewBox:MCandleViewBox;
+  public candleWidth:number=10;
+  constructor(){
+
+  }
+
   public viewBox(){
     this.viewBoxString = `${this.viewBoxX} ${this.viewBoxY} ${this.viewBoxWidth} ${this.viewBoxHeight}`;
     return this.viewBoxString;
@@ -221,26 +287,15 @@ export class MuiTimeAxis {
   public tickPositions:number[]=[];
   public timeInterval:number;//in second
 
-  //this is need to determine to when to update time axis
-  // lets have 1m setup. for this, we will have 5 ticks
-  // since this.timeInterval=5*m
-  //each time interval setup has different coefficient which is 5 in this case.
-  //this has will store the <'1M',5> pairs.
-  public updateThresholdCounts:KeyedCollection<number>;
-  public timeIntervalInSecond:KeyedCollection<number>;
+
 
 
   constructor(timeInterval:string, domain:number[], range:number[]){
-    this.updateThresholdCounts = new   KeyedCollection<number>();
-    this.timeIntervalInSecond = new   KeyedCollection<number>();
-
-    this.populateUpdateThresholdCounts();
-
-    this.timeInterval = this.timeIntervalInSecond.item(timeInterval);
+    this.timeInterval = MCONSTANTS.timeIntervalInSecond.item(timeInterval);
 
     this.domain = domain;
     this.range = [ range[0]-Math.abs(range[0])*0.05, range[1]+Math.abs(range[1])*0.05 ];
-    this.tickCount=(domain[1]-domain[0])/this.timeInterval/this.updateThresholdCounts.item(timeInterval);
+    this.tickCount=(domain[1]-domain[0])/this.timeInterval/MCONSTANTS.updateThresholdCounts.item(timeInterval);
 
 
 
@@ -257,32 +312,7 @@ export class MuiTimeAxis {
 
   }
 
-  populateUpdateThresholdCounts(){
-    //see setTimeInterval
 
-    this.timeIntervalInSecond.add('1M',60);
-    this.timeIntervalInSecond.add('5M',5*60); // 20/5=4
-    this.timeIntervalInSecond.add('30M',30*60);
-    this.timeIntervalInSecond.add('1H',60*60);
-    this.timeIntervalInSecond.add('2H',2*60*60);
-    this.timeIntervalInSecond.add('4H',4*60*60);
-    this.timeIntervalInSecond.add('12H',12*60*60);
-    this.timeIntervalInSecond.add('1D',1*24*60*60);
-    this.timeIntervalInSecond.add('1W',7*1*24*60*60);
-
-    this.updateThresholdCounts.add('1M',10);
-    this.updateThresholdCounts.add('5M',6); // 20/5=4
-    this.updateThresholdCounts.add('30M',8);
-    this.updateThresholdCounts.add('1H',6);
-    this.updateThresholdCounts.add('2H',8);
-    this.updateThresholdCounts.add('4H',12);
-    this.updateThresholdCounts.add('12H',6);
-    this.updateThresholdCounts.add('1D',7);
-    this.updateThresholdCounts.add('1W',4);
-
-
-
-  }
 
 
 }

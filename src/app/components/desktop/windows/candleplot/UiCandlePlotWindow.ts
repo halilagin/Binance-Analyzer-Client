@@ -17,6 +17,7 @@ import {UiCandle} from "./UiCandle";
 import {UiPriceAxis} from "../../fragments/UiPriceAxis";
 import {UiCandlePlotStreamingFrame} from "./UiCandlePlotStreamingFrame";
 import {UiTimeAxis} from "../../fragments/UiTimeAxis";
+import {ServiceUiCandlePlotStreamingFrame} from "./ServiceUiCandlePlotStreamingFrame";
 // see: https://www.sarasoueidan.com/blog/svg-coordinate-systems/
 // see: https://github.com/ohjames/rxjs-websockets
 
@@ -94,6 +95,7 @@ export class UiCandlePlotWindow implements OnInit {
   public timeAxisWidth:number;
   public scaleServiceSubscription:Subscription;
   public cahceServiceSubscription:Subscription;
+  public uiCandlePlotServiceSubscription:Subscription;
 
   @ViewChild('priceAxis') priceAxis: UiPriceAxis;
   @ViewChild('candlePlot') candlePlot: UiCandlePlotStreamingFrame;
@@ -108,7 +110,8 @@ export class UiCandlePlotWindow implements OnInit {
     private renderer: Renderer,
     // private candleReaderService:WebSocketCandleReaderService,
     private cacheService:ServiceCandleCache,
-    private scaleService:ServiceCandlePlotScale
+    private scaleService:ServiceCandlePlotScale,
+    private uiCandlePlotService:ServiceUiCandlePlotStreamingFrame,
 
   ) {
     this.model = new MUiCandlePlotWindow();
@@ -118,8 +121,8 @@ export class UiCandlePlotWindow implements OnInit {
 
 
     this.cahceServiceSubscription = this.cacheService.getMessage().subscribe(message => this.cahceServiceMessageHandler(message));
-
     this.scaleServiceSubscription = this.scaleService.getMessage().subscribe(message => this.scaleServiceMessageHandler(message));
+    this.uiCandlePlotServiceSubscription = this.uiCandlePlotService.getMessage().subscribe(message => this.uiCandlePlotMessageHandler(message));
 
   }
 
@@ -132,14 +135,24 @@ export class UiCandlePlotWindow implements OnInit {
         this.scaleService.changeScale(message.plotUUID, extent);
         let priceDomain = [extent[1],extent[3]];
         this.priceAxis.changeScale(priceDomain);
-      }
-
-      let timeDomain = [extent[2]-60*this.timeAxis.timeIntervalInSecond(),extent[2]];
-      let timeRange=[0,this.candlePlot.model.width];
-      this.timeAxis.changeScale(this.timeAxis.timeInterval, timeDomain, timeRange );
-
+    }
+      //this.timeAxisChangedHandler([extent[0],extent[1]]);
   }
 
+  timeAxisChangedHandler(timeDomain){
+    //let timeDomain = [extent[1]-60*this.timeAxis.timeIntervalInSecond(),extent[1]];
+    let timeRange=[0,this.candlePlot.model.width];
+    this.timeAxis.changeScale(this.timeAxis.timeInterval, timeDomain, timeRange );
+  }
+
+  uiCandlePlotMessageHandler(message){
+    if (message.action=="viewboxChanged"){
+      //do change in time axis
+      let domainExtent = message.bordersInOpenTime;
+
+      this.timeAxisChangedHandler(domainExtent);
+    }
+  }
 
   scaleServiceMessageHandler(message){
 

@@ -7,6 +7,8 @@ import {Injectable} from "@angular/core";
 import {Subject, Observable} from "rxjs";
 import {KeyedCollection} from "../../../../model/collections";
 import * as d3  from 'd3-ng2-service/src/bundle-d3';
+import {MCandle} from "../../../../model/bac.frontend";
+import {MUiCandle} from "../../../../model/model";
 
 // circular cache
 // candles array is circular.
@@ -19,19 +21,22 @@ export class CandlePlotScale{
   public height:number=null;
   public width:number=null;
 
-  public scaleX=(val):number=>{return null;};
-  public scaleY=(val):number=>{return null;};
+  public scaleX:any;
+  public scaleY:any=(val):number=>{return null;};
+
+  public rscaleX:any;
+
 
   private d3ScaleY;
   private d3ScaleX;
-
+  private d3RScaleX;
   private cacheSize=500;
+
 
 
 
   constructor(uuid:string, extent:number[], width:number, height:number){
     this.d3ScaleY = d3.scaleLinear().domain([ extent[1]-Math.abs(extent[1])*0.1, extent[3]+Math.abs(extent[3])*0.1 ]).range([height,0]);
-    //this.d3ScaleX = d3.scaleLinear().domain([ extent[0]-Math.abs(extent[0])*0.1, extent[2]+Math.abs(extent[2])*0.1 ]).range([-4200,width]);
 
     let ordinalDomain=[];
     for (let i=0;i<this.cacheSize;i++){//items are in max first, min last order.
@@ -44,6 +49,7 @@ export class CandlePlotScale{
       ordinalRange.push(width-i*10-100);//TODO: this shows the last candles position. replace the constant. 10 is the width of the candle. 100 is to move a bit to the left.
     }
     this.d3ScaleX = d3.scaleOrdinal().domain(ordinalDomain).range(ordinalRange);
+    this.d3RScaleX = d3.scaleOrdinal().domain(ordinalRange).range(ordinalDomain);
     //extent: [minX:number, maxX:number,minY:number,maxY:number]
     //this.candleCacheSubscription = this.cacheService.getMessage().subscribe(message => this.candleCacheMessageHandler(message));
     this.uuid = uuid;
@@ -58,6 +64,11 @@ export class CandlePlotScale{
 
     this.scaleX = (val) =>{
       return this.d3ScaleX(val);
+    };
+
+    this.rscaleX = (val) =>{
+      return  this.d3RScaleX (val);
+
     };
 
 
@@ -100,9 +111,14 @@ export class ServiceCandlePlotScale {
     this.scales.add(uuid, cps);
   }
 
-  public scaleX(uuid:string){
+  public scaleX(uuid:string):any{
     return this.scales.item(uuid).scaleX;
   }
+
+  public rscaleX(uuid:string):any{
+    return this.scales.item(uuid).rscaleX;
+  }
+
   public scaleY(uuid:string){
     return this.scales.item(uuid).scaleY;
   }

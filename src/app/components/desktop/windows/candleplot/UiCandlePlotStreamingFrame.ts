@@ -2,7 +2,7 @@ import {
   Component, OnInit, Input, ViewChild, forwardRef, Renderer, ComponentFactoryResolver,
   ElementRef, ViewContainerRef, Inject, ReflectiveInjector, HostListener, HostBinding, Host, OnDestroy
 } from '@angular/core';
-import {MUiCandle, ObjectId, MUiCandlePlotStreamingFrame} from "../../../../model/model";
+import {MUiCandle, ObjectId, MUiCandlePlotStreamingFrame, MCandleViewBox} from "../../../../model/model";
 import {BasWebSocketService} from "../../../../services/BasWebSocketService";
 import {BacLocalService} from "../../../../services/BacLocalService";
 //import { v4 as uuid } from 'uuid';
@@ -14,6 +14,7 @@ import {ServiceCandleCache, CandleCache} from "./ServiceCandleCache";
 import {ServiceCandlePlotScale} from "./ServiceCandlePlotScale";
 import * as d3  from 'd3-ng2-service/src/bundle-d3';
 import {UiCandle} from "./UiCandle";
+import {ServiceUiCandlePlotStreamingFrame} from "./ServiceUiCandlePlotStreamingFrame";
 // see: https://www.sarasoueidan.com/blog/svg-coordinate-systems/
 // see: https://github.com/ohjames/rxjs-websockets
 
@@ -45,23 +46,22 @@ import {UiCandle} from "./UiCandle";
 
 })
 export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
-
   @Input() x:number;
   @Input() y:number;
-
-  model:MUiCandlePlotStreamingFrame;
-
   @Input() symbol:string="XLMETH";
   @Input() timeInterval:number=60;
   @Input() width:string='800';
   @Input() height:string='480';
   @Input() uuid:string=null;
 
+  model:MUiCandlePlotStreamingFrame;
   candleReaderSubscription: Subscription;
+  timeFrameInViewBox:number[]; //the left most and right most candles' opentime values.
+
   @ViewChild("gcontainer") gcontainerEl:ElementRef;
   @ViewChild('gcontainer', {read: ViewContainerRef}) gcontainer: ViewContainerRef;
-
   @ViewChild("initializationMessage") initializationMessageEl:ElementRef;
+
 
 
   initializationMessageTransformString:string;
@@ -76,7 +76,9 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
     private bacLocalService:BacLocalService,
     private candleReaderService:WebSocketCandleReaderService,
     private cacheService:ServiceCandleCache,
-    private scaleService:ServiceCandlePlotScale
+    private scaleService:ServiceCandlePlotScale,
+    private myService:ServiceUiCandlePlotStreamingFrame,
+
 
   ) {
 
@@ -85,14 +87,7 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
     this.uuid = UUID.UUID();
 
 
-    this.candleReaderSubscription = this.candleReaderService.getMessage().subscribe(message => this.candleReaderMessageHandler(message));
-    this.cacheService.initCandlePlotCache(this.uuid);
-    this.scaleService.initCandlePlotScale(
-      this.uuid,
-      [0,0,0,0],/*minx,miny,max,maxy*/
-      +this.width,
-      +this.height
-    );
+
 
   }
 
@@ -133,6 +128,14 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
       this.createCandleComponent(c, i, +this.width, +this.height);
     }
 
+    if (this.model.startStreaming==false){//this the first time streamed candles created. after that this block will not be executed again.
+      //initialize the candles in viewBox. after that these candleViewbox will be updated by dragging which changes the viewbox.
+      this.model.candleViewBox.firstIndex = this.cacheService.caches.item(this.uuid).cacheViewBox.firstIndex;
+      this.model.candleViewBox.lastIndex = this.cacheService.caches.item(this.uuid).cacheViewBox.lastIndex;
+      //update x and y scales.
+    } else
+      ;//it is now streaming and first and last should be updated by dragging but not cache service.
+
 
   }
 
@@ -142,12 +145,13 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
       console.log("CandlePlot: uuid mismatch", "mine is", this.uuid, "received client uuid:",message.plotId);
       return;
     }
-    console.log("CandlePlot: received new candles, length:",message.candles.length);
-    this.renderer.setElementStyle(this.initializationMessageEl.nativeElement, 'display', 'none');
+//    console.log("CandlePlot: received new candles, length:",message.candles.length);
+    //this.renderer.setElementStyle(this.initializationMessageEl.nativeElement, 'display', 'none');
 
     let candles = <MCandle[]> message.candles;
     // console.log(`[candle_plot_${this.plotId}]`, candles.length);
     this.projectCandles(candles);
+    this.model.startStreaming = true;
 
   }
 
@@ -200,9 +204,23 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
     this.model.timeInterval = +this.timeInterval;
     this.model.viewBox();
     this.model.startStreaming=false;
+    this.model.candleWidth=10;
     this.initializationMessageTransformString = this.initializationMessageTransform();
 
-    console.log("ngOnInit.initializationMessageTransformString",this.initializationMessageTransformString);
+
+    this.model.candleViewBox = new MCandleViewBox(this.model.width, this.model.candleWidth);
+
+    this.candleReaderSubscription = this.candleReaderService.getMessage().subscribe(message => this.candleReaderMessageHandler(message));
+    this.cacheService.initCandlePlotCache(this.uuid, this.model.viewBoxWidth, this.model.candleWidth);
+    this.scaleService.initCandlePlotScale(
+      this.uuid,
+      [0,0,0,0],/*minx,miny,max,maxy*/
+      +this.width,
+      +this.height
+    );
+
+
+    //console.log("ngOnInit.initializationMessageTransformString",this.initializationMessageTransformString);
 
     if (this.bacLocalService.clientState.bacClientId!=null){
       this.wsService.sendMessage({
@@ -228,7 +246,7 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
   @HostListener('mousedown', ['$event'])
   mouseDown(e) {
     e.stopPropagation();
-    console.log("mousedown",e);
+    //console.log("mousedown",e);
     this.model.mouseSwipeMove.x1=+e.offsetX;
   }
 
@@ -239,11 +257,34 @@ export class UiCandlePlotStreamingFrame implements OnInit, OnDestroy {
     let moveLength = this.model.mouseSwipeMove.x1-this.model.mouseSwipeMove.x2;
 
     //make swipe faster, take pow of 1.1
-    if (moveLength<0)
-      this.model.viewBoxX -=  Math.pow(Math.abs(moveLength),1.1);
-    else
-      this.model.viewBoxX +=  Math.pow(Math.abs(moveLength),1.1);
+    let change_ = Math.pow(Math.abs(moveLength),1.1);
+    let candleCount = Math.floor(change_/this.model.candleWidth);
+    change_ = candleCount * this.model.candleWidth; //make the change multiplication of candlewidth
+    let direction=0;
+    if (moveLength<0) {
+      this.model.viewBoxX -= change_;
+      direction=-1;
+    }else {
+      this.model.viewBoxX += change_;
+      direction=1;
+    }
     this.model.viewBox();
+
+    this.setCandleViewBox(direction, candleCount);
+  }
+
+  setCandleViewBox(direction, candleCount){
+    //cacheService
+    this.cacheService.moveCacheViewBox(this.uuid, direction, candleCount);
+    let timeDomainExtent= this.cacheService.cacheViewBoxTimes(this.uuid);
+
+    let message = {
+      "action":"viewboxChanged",
+      "bordersInOpenTime":timeDomainExtent
+    };
+
+
+    this.myService.sendMessage(message);
   }
 
   ngOnDestroy(){

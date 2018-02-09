@@ -1,6 +1,6 @@
 import {MCandle} from "../../../../model/bac.frontend";
 import {Injectable} from "@angular/core";
-import {CandleCacheMessage, MUiCandlePlotWindow} from "../../../../model/model";
+import {CandleCacheMessage, MUiCandlePlotWindow, MUiCandle, MCandleViewBox} from "../../../../model/model";
 import {Subject, Observable} from "rxjs";
 import {KeyedCollection} from "../../../../model/collections";
 /**
@@ -12,10 +12,11 @@ import {KeyedCollection} from "../../../../model/collections";
 // candles array is circular.
 // see: http://www.sanfoundry.com/java-program-circular-buffer/
 
+
+
+
 export class CandleCache{
   public candles:MCandle[]=[];
-  public front:number=-1;
-  public rear:number=-1;
   public count:number=-1;
   public lastInsertCount:number=-1;
   public extent:number[]=[0,0,0,0];//minx miny, maxx maxy
@@ -28,18 +29,20 @@ export class CandleCache{
   public uuid:string;
   public subject:Subject<any>;
 
+  public cacheViewBox:MCandleViewBox;
+  public candleCountInViewBox:number;
 
 
-
-  constructor(uuid:string, cacheSize:number, subject:Subject<any>){
+  constructor(uuid:string, cacheSize:number, subject:Subject<any>, viewBoxWidth:number, candleWidth:number){
     this.uuid = uuid;
-    this.front=0;
-    this.rear=0;
     this.count=0;
     this.cacheSize = cacheSize;
     this.subject = subject;
+    this.cacheViewBox = new MCandleViewBox(viewBoxWidth,candleWidth);
+    this.candleCountInViewBox = viewBoxWidth/candleWidth;
     for(let i=0;i<this.cacheSize;i++)
       this.candles.push(new MCandle());
+
 
   }
 
@@ -131,8 +134,6 @@ export class CandleCache{
   }
 
   public clear() {
-    this.front =  0;
-    this.rear = 0;
     this.count = 0;
     this.candles = new MCandle[this.cacheSize];
   }
@@ -146,24 +147,19 @@ export class CandleCache{
   }
 
   private insert(c:MCandle) {
-    this.count++;
-    this.rear = (this.rear + 1) % this.cacheSize;
-    this.candles[this.rear] = c;
-
+    this.candles.shift();
+    this.candles.push(c);
   }
 
   public readLast(n?:number):MCandle[]{
     if (n===undefined)
-      return [this.candles[this.rear]];
+      return [this.candles[this.cacheSize-1]];
     if (n===0)
       return [];
 
-    let first = (this.rear-n+this.getCacheSize()) % this.cacheSize;
     let candles_:MCandle[] = [];
-    for (let i=0; i<n; i++){
-      let idx = (first+i)%this.cacheSize;
-      candles_.push(this.candles[idx]);
-    }
+    for (let i=this.cacheSize-n; i< this.cacheSize; i++)
+      candles_.push(this.candles[i]);
     return candles_;
   }
 
@@ -221,6 +217,7 @@ export class CandleCache{
     });
     this.lastInsertCount = cs.length;
 
+
     let message:CandleCacheMessage= new CandleCacheMessage();
     message.action="scaleChanged";
     message.data = this.extent;
@@ -237,6 +234,25 @@ export class CandleCache{
     return this.readLast(this.lastInsertCount);
   }
 
+
+  moveCacheViewBox(direction:number,candleCount:number){
+    if (Number.isNaN(direction) || Number.isNaN(direction) || this.cacheViewBox.lastIndex==-1 || this.cacheViewBox.firstIndex==-1 ){
+      this.cacheViewBox.lastIndex = this.cacheSize-1;
+      this.cacheViewBox.firstIndex = this.cacheViewBox.lastIndex - Math.floor(this.cacheViewBox.viewBoxWidth / this.cacheViewBox.candleWidth);
+        console.log("moveCacheViewBox nan case");
+    } else {
+      this.cacheViewBox.firstIndex += direction * candleCount;//direction 1 or -1
+      this.cacheViewBox.lastIndex += direction * candleCount;//direction 1 or -1
+    }
+    console.log("moveCacheViewBox.direction & count:",direction,candleCount);
+
+    console.log("moveCacheViewBox.indexes:",this.cacheViewBox.firstIndex,this.cacheViewBox.lastIndex, this.cacheViewBox.viewBoxWidth, this.cacheViewBox.candleWidth);
+
+  }
+
+  getCandle(idx):MCandle{
+    return this.candles[idx];
+  }
 }
 
 
@@ -251,8 +267,8 @@ export class ServiceCandleCache {
     this.caches = new KeyedCollection<CandleCache>();
   }
 
-  public initCandlePlotCache(uuid:string){
-    this.caches.add(uuid, new CandleCache(uuid,this.cacheSize, this.subject));
+  public initCandlePlotCache(uuid:string,   viewBoxWidth:number, candleWidth:number){
+    this.caches.add(uuid, new CandleCache(uuid,this.cacheSize, this.subject, viewBoxWidth, candleWidth));
   }
 
 
@@ -323,5 +339,21 @@ export class ServiceCandleCache {
     return this.caches.item(uuid).readLastInserteds();
   }
 
+  public moveCacheViewBox(uuid:string, direction:number, candleCount:number){
+      let cache_ = this.caches.item(uuid);
+      cache_.moveCacheViewBox(direction,candleCount);
+  }
+
+  public cacheViewBoxTimes(uuid:string){
+    let cache_ = this.caches.item(uuid);
+    let firstIndex = cache_.cacheViewBox.firstIndex;
+    let lastIndex = cache_.cacheViewBox.lastIndex;
+    console.log("cacheViewBoxTimes.indexes:",firstIndex,lastIndex);
+    return [cache_.candles[firstIndex].openTime,cache_.candles[lastIndex].openTime];
+  }
+
+  public getCandle(uuid:string,idx:number):MCandle{
+    return this.caches.item(uuid).getCandle(idx);
+  }
 
 }
